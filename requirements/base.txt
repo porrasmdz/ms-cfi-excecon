@@ -1,0 +1,6 @@
+sqlalchemy
+pydantic
+pydantic-settings
+pytest
+psycopg2-binary
+fastapi
