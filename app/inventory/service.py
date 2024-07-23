@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from uuid import UUID
 
 from .models import (
@@ -15,6 +15,12 @@ def update_validating_deletion_time(object, key, value):
     if key == "deleted_at":
         setattr(object, key, value)
 
+def get_wh_locations_for_warehouse(db: Session, warehouse_id: UUID):
+    warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
+    if warehouse:
+        result = [wh_loc.id for wh_loc in warehouse.wh_locations]
+        return result
+    return []
 
 # CRUD Operations for Warehouse
 #TODO: Validate Company, Warehouse_Type exist
@@ -23,7 +29,9 @@ def get_warehouses(session: Session, skip: int = 0, limit: int = 100):
     return wh_list
 
 def get_warehouse(session: Session, warehouse_id: UUID):
-    return session.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
+    warehouse = session.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
+    
+    return warehouse
 
 def create_warehouse(session: Session, warehouse: Warehouse):
     session_warehouse = Warehouse(**warehouse.model_dump())
@@ -45,9 +53,11 @@ def update_warehouse(session: Session, warehouse_id: UUID, warehouse: Warehouse)
 
 def delete_warehouse(session: Session, warehouse_id: UUID):
     session_warehouse = session.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
+    
     if not session_warehouse:
         raise HTTPException(status_code=400, detail=f"Warehouse with id {warehouse_id} not found")
-    
+    if len(session_warehouse.wh_locations) > 0:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=f"Warehouse with id {warehouse_id} contains warehouse locations. Please delete all WH Locations first.")
     session.delete(session_warehouse)
     session.commit()
     return session_warehouse

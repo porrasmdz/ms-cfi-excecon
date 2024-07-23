@@ -20,7 +20,7 @@ def get_company(session: Session, company_id: UUID):
     return session.query(Company).filter(Company.id == company_id).first()
 
 def create_company(session: Session, company: Company):
-    session_company = Company(**company.dict())
+    session_company = Company(**company.model_dump())
     session.add(session_company)
     session.commit()
     session.refresh(session_company)
@@ -29,7 +29,7 @@ def create_company(session: Session, company: Company):
 def update_company(session: Session, company_id: UUID, company: Company):
     session_company = session.query(Company).filter(Company.id == company_id).first()
     if session_company:
-        for key, value in company.dict(exclude_unset=True).items():
+        for key, value in company.model_dump(exclude_unset=True).items():
             update_validating_deletion_time(session_company, key, value)
             
         session.commit()
@@ -56,7 +56,7 @@ def get_corporate_group(session: Session, corporate_group_id: UUID):
     return session.query(CorporativeGroup).filter(CorporativeGroup.id == corporate_group_id).first()
 
 def create_corporate_group(session: Session, corporate_group: CorporativeGroup):
-    session_corporate_group = CorporativeGroup(**corporate_group.dict())
+    session_corporate_group = CorporativeGroup(**corporate_group.model_dump())
     session.add(session_corporate_group)
     session.commit()
     session.refresh(session_corporate_group)
@@ -65,7 +65,7 @@ def create_corporate_group(session: Session, corporate_group: CorporativeGroup):
 def update_corporate_group(session: Session, corporate_group_id: UUID, corporate_group: CorporativeGroup):
     session_corporate_group = session.query(CorporativeGroup).filter(CorporativeGroup.id == corporate_group_id).first()
     if session_corporate_group:
-        for key, value in corporate_group.dict(exclude_unset=True).items():
+        for key, value in corporate_group.model_dump(exclude_unset=True).items():
             update_validating_deletion_time(session_corporate_group, key, value)
         session.commit()
         session.refresh(session_corporate_group)
@@ -91,7 +91,7 @@ def get_contact(session: Session, contact_id: UUID):
     return session.query(Contact).filter(Contact.id == contact_id).first()
 
 def create_contact(session: Session, contact: Contact):
-    session_contact = Contact(**contact.dict())
+    session_contact = Contact(**contact.model_dump())
     session.add(session_contact)
     session.commit()
     session.refresh(session_contact)
@@ -100,7 +100,7 @@ def create_contact(session: Session, contact: Contact):
 def update_contact(session: Session, contact_id: UUID, contact: Contact):
     session_contact = session.query(Contact).filter(Contact.id == contact_id).first()
     if session_contact:
-        for key, value in contact.dict(exclude_unset=True).items():
+        for key, value in contact.model_dump(exclude_unset=True).items():
             update_validating_deletion_time(session_contact, key, value)
         session.commit()
         session.refresh(session_contact)

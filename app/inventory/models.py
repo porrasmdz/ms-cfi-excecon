@@ -2,7 +2,6 @@ from sqlalchemy import Boolean, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional
 from uuid import UUID, uuid4
-from app.cyclic_count.models import CyclicCount, CountRegistry
 from ..models import BaseSQLModel, Base, ccount_product_table
 
 warehouse_product_table = Table(
@@ -26,7 +25,7 @@ class Warehouse(BaseSQLModel):
     state: Mapped[Optional[str]] = mapped_column(default="Guayas")
     city: Mapped[Optional[str]] = mapped_column(default="Guayaquil")
     address: Mapped[Optional[str]] = mapped_column(default="Av AAA y Calle AAA, Edificio AAA")
-    company :  Mapped[UUID] = mapped_column() #In this ms this does not exist its just an Id
+    company_id :  Mapped[UUID] = mapped_column() #In this ms this does not exist its just an Id
     
     #Many to one
     warehouse_type_id : Mapped[UUID] = mapped_column(ForeignKey("warehouse_type.id"))
@@ -86,7 +85,7 @@ class Product(BaseSQLModel):
     unit_cost : Mapped[int] = mapped_column() #Multiplied by 100000
     
     #Many to one relation
-    cyclic_count_id : Mapped[UUID] = mapped_column() #Modify this
+    # cyclic_count_id : Mapped[UUID] = mapped_column() #Modify this
 
     measure_unit_id : Mapped[UUID] = mapped_column(ForeignKey("measure_unit.id"))
     measure_unit : Mapped["MeasureUnit"] = relationship(back_populates="products")
@@ -135,3 +134,6 @@ class MeasureUnit(BaseSQLModel):
 # class Report(Base):
 #     __tablename__ = "inventory_report"
 #     name : Mapped[str] = mapped_column()
+
+
+from app.cyclic_count.models import CyclicCount, CountRegistry

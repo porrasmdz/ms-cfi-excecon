@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional,  List
 from pydantic import BaseModel
 from uuid import UUID
 from ..schemas import CreateSchema, ReadSchema, UpdateSchema
@@ -13,6 +13,17 @@ class ReadWarehouse(ReadSchema):
     address: Optional[str] = None 
     company_id: UUID 
     warehouse_type_id: UUID
+
+class DetailedWarehouse(ReadSchema):
+    id: UUID
+    name: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
+    address: Optional[str] = None 
+    company_id: UUID 
+    warehouse_type_id: UUID
+    wh_locations: Optional[List["ReadWarehouseType"]]
 
 
 class CreateWarehouse(CreateSchema):
@@ -36,6 +47,11 @@ class UpdateWarehouse(UpdateSchema):
 class ReadWarehouseType(ReadSchema):
     id: UUID
     name: str
+    description: Optional[str] = None
+class DetailedWarehouseType(ReadSchema):
+    id: UUID
+    name: str
+    warehouses: Optional[List[ReadWarehouse]]
     description: Optional[str] = None
 
 class CreateWarehouseType(CreateSchema):
@@ -106,10 +122,13 @@ class UpdateProduct(UpdateSchema):
 class ReadProductCategory(ReadSchema):
     id: UUID
     name: str
+    short_codename: str
 class CreateProductCategory(CreateSchema):
     name: str
+    short_codename: str
 class UpdateProductCategory(UpdateSchema):
     name: Optional[str]
+    short_codename: Optional[str] = None
 
 ###MEASURE UNIT#######
 class ReadMeasureUnit(ReadSchema):

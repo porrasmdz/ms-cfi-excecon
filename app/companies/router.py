@@ -34,27 +34,27 @@ def delete_company(company_id: UUID, session: Session = Depends(get_session)):
     return service.delete_company(session=session, company_id=company_id)
 
 # CorporativeGroup routes
-@router.get("/corporative_groups/", response_model=List[schemas.ReadCorporativeGroup])
+@router.get("/corporative_groups/", response_model=List[schemas.ReadCorporateGroup])
 def read_corporative_groups(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    corporative_groups = service.get_corporative_groups(session, skip=skip, limit=limit)
+    corporative_groups = service.get_corporate_groups(session, skip=skip, limit=limit)
     return corporative_groups
 
-@router.get("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporativeGroup)
+@router.get("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporateGroup)
 def read_corporative_group(corporative_group_id: UUID, session: Session = Depends(get_session)):
-    session_corporative_group = service.get_corporative_group(session, corporative_group_id=corporative_group_id)
+    session_corporative_group = service.get_corporate_group(session, corporative_group_id=corporative_group_id)
     if session_corporative_group is None:
         raise HTTPException(status_code=404, detail="CorporativeGroup not found")
     return session_corporative_group
 
-@router.post("/corporative_groups/", response_model=schemas.ReadCorporativeGroup)
-def create_corporative_group(corporative_group: schemas.CreateCorporativeGroup, session: Session = Depends(get_session)):
+@router.post("/corporative_groups/", response_model=schemas.ReadCorporateGroup)
+def create_corporative_group(corporative_group: schemas.CreateCorporateGroup, session: Session = Depends(get_session)):
     return service.create_corporative_group(session=session, corporative_group=corporative_group)
 
-@router.put("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporativeGroup)
-def update_corporative_group(corporative_group_id: UUID, corporative_group: schemas.UpdateCorporativeGroup, session: Session = Depends(get_session)):
+@router.put("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporateGroup)
+def update_corporative_group(corporative_group_id: UUID, corporative_group: schemas.UpdateCorporateGroup, session: Session = Depends(get_session)):
     return service.update_corporative_group(session=session, corporative_group_id=corporative_group_id, corporative_group=corporative_group)
 
-@router.delete("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporativeGroup)
+@router.delete("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporateGroup)
 def delete_corporative_group(corporative_group_id: UUID, session: Session = Depends(get_session)):
     return service.delete_corporative_group(session=session, corporative_group_id=corporative_group_id)
 

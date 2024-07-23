@@ -4,18 +4,17 @@ from typing import List, Optional, Literal
 from uuid import UUID, uuid4
 from ..models import BaseSQLModel, ccount_product_table
 from datetime import datetime
-from app.inventory.models import Product
-
+from ..inventory.models import Product
 class CyclicCount(BaseSQLModel):
     __tablename__ = "cyclic_count"
     id : Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name : Mapped[str] = mapped_column()
     status : Mapped[Optional[str]] = mapped_column() #Abierto, Revision, Cerrado
     count_type : Mapped[str] = mapped_column(default="Primer Conteo") #Primero, Segundo, Tercero, Cuarto, Conciliacion ...
-    count_date_start : Mapped[datetime] = mapped_column(default_factory=datetime.now) 
-    count_date_finish : Mapped[datetime] = mapped_column(default_factory=datetime.now)
+    count_date_start : Mapped[datetime] = mapped_column() 
+    count_date_finish : Mapped[datetime] = mapped_column()
 
-    products : Mapped["Product"] = relationship(
+    products : Mapped[Optional[List["Product"]]] = relationship(
         secondary=ccount_product_table, back_populates="cyclic_counts"
     )
     count_registries : Mapped[Optional[List["CountRegistry"]]] = relationship(back_populates="cyclic_count")
@@ -55,3 +54,4 @@ class ActivityRegistry(BaseSQLModel):
     
     count_registry_id : Mapped[UUID] = mapped_column(ForeignKey("count_registry.id"))
     count_registry : Mapped["CountRegistry"] = relationship(back_populates="activity_registries")
+

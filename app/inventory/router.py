@@ -13,7 +13,7 @@ def read_warehouses(skip: int = 0, limit: int = 10, session: Session = Depends(g
     warehouses = service.get_warehouses(session, skip=skip, limit=limit)
     return warehouses
 
-@router.get("/warehouses/{warehouse_id}", response_model=schemas.ReadWarehouse)
+@router.get("/warehouses/{warehouse_id}", response_model=schemas.DetailedWarehouse)
 def read_warehouse(warehouse_id: UUID, session: Session = Depends(get_session)):
     session_warehouse = service.get_warehouse(session, warehouse_id=warehouse_id)
     if session_warehouse is None:
@@ -38,7 +38,7 @@ def read_warehouse_types(skip: int = 0, limit: int = 10, session: Session = Depe
     warehouse_types = service.get_warehouse_types(session, skip=skip, limit=limit)
     return warehouse_types
 
-@router.get("/warehouse_types/{warehouse_type_id}", response_model=schemas.ReadWarehouseType)
+@router.get("/warehouse_types/{warehouse_type_id}", response_model=schemas.DetailedWarehouseType)
 def read_warehouse_type(warehouse_type_id: UUID, session: Session = Depends(get_session)):
     session_warehouse_type = service.get_warehouse_type(session, warehouse_type_id=warehouse_type_id)
     if session_warehouse_type is None:
@@ -46,11 +46,11 @@ def read_warehouse_type(warehouse_type_id: UUID, session: Session = Depends(get_
     return session_warehouse_type
 
 @router.post("/warehouse_types/", response_model=schemas.ReadWarehouseType)
-def create_warehouse_type(warehouse_type: schemas.ReadWarehouseType, session: Session = Depends(get_session)):
+def create_warehouse_type(warehouse_type: schemas.CreateWarehouseType, session: Session = Depends(get_session)):
     return service.create_warehouse_type(session=session, warehouse_type=warehouse_type)
 
 @router.put("/warehouse_types/{warehouse_type_id}", response_model=schemas.ReadWarehouseType)
-def update_warehouse_type(warehouse_type_id: UUID, warehouse_type: schemas.ReadWarehouseType, session: Session = Depends(get_session)):
+def update_warehouse_type(warehouse_type_id: UUID, warehouse_type: schemas.UpdateWarehouseType, session: Session = Depends(get_session)):
     return service.update_warehouse_type(session=session, warehouse_type_id=warehouse_type_id, warehouse_type=warehouse_type)
 
 @router.delete("/warehouse_types/{warehouse_type_id}", response_model=schemas.ReadWarehouseType)
