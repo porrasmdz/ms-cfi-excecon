@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from typing import List, Any
+from app.models import BaseSQLModel
+from app.schemas import TableQueryBody
+from app.service import get_paginated_resource
 from uuid import UUID
-
 from .models import (
     Company, CorporativeGroup, Contact )
-
-
 
 def update_validating_deletion_time(object, key, value):
     if value is not None and key != "deleted_at":
@@ -13,8 +14,8 @@ def update_validating_deletion_time(object, key, value):
     if key == "deleted_at":
         setattr(object, key, value)
 
-def get_companies(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(Company).offset(skip).limit(limit).all()
+def get_companies(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_company(session: Session, company_id: UUID):
     return session.query(Company).filter(Company.id == company_id).first()
@@ -49,8 +50,8 @@ def delete_company(session: Session, company_id: UUID):
 
 # CRUD Operations for CorporativeGroup
 
-def get_corporate_groups(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(CorporativeGroup).offset(skip).limit(limit).all()
+def get_corporate_groups(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_corporate_group(session: Session, corporate_group_id: UUID):
     return session.query(CorporativeGroup).filter(CorporativeGroup.id == corporate_group_id).first()
@@ -84,8 +85,8 @@ def delete_corporate_group(session: Session, corporate_group_id: UUID):
 
 # CRUD Operations for Contact
 
-def get_contacts(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(Contact).offset(skip).limit(limit).all()
+def get_contacts(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_contact(session: Session, contact_id: UUID):
     return session.query(Contact).filter(Contact.id == contact_id).first()

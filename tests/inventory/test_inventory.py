@@ -1,7 +1,5 @@
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-from app import schemas
 from uuid import uuid4
+from app import schemas
 
 ###############Warehouse
 def test_create_warehouse(client, sample_data_warehouse):
@@ -26,7 +24,8 @@ def test_read_warehouses(client):
     response = client.get("/warehouses/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_warehouse(client, sample_data_warehouse):
     warehouse_id = str(sample_data_warehouse["warehouse_id"])
@@ -66,7 +65,8 @@ def test_read_warehouse_types(client):
     response = client.get("/warehouse_types/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_warehouse_type(client, sample_data_warehouse):
     warehouse_type_id = str(sample_data_warehouse["warehouse_type_id"])
@@ -111,7 +111,8 @@ def test_read_wh_locations(client):
     response = client.get("/whlocations/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_wh_location(client, sample_data_warehouse):
     wh_location_id = str(sample_data_warehouse["wh_location_id"])
@@ -143,7 +144,8 @@ def test_read_wh_location_types(client):
     response = client.get("/whlocation_types/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_wh_location_type(client, sample_data_warehouse):
     wh_location_type_id = str(sample_data_warehouse["wh_location_type_id"])
@@ -181,7 +183,8 @@ def test_read_products(client) -> None:
     response = client.get("/products/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_product(client, sample_product_data):
     product_id = sample_product_data["product_id"]
@@ -214,7 +217,8 @@ def test_read_product_categories(client) -> None:
     response = client.get("/product_categories/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_product_category(client, sample_product_category_mu_data):
     category_id = sample_product_category_mu_data["category_id"]
@@ -245,7 +249,8 @@ def test_read_measure_units(client) -> None:
     response = client.get("/measure_units/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_measure_unit(client, sample_product_category_mu_data):
     measure_unit_id = sample_product_category_mu_data["measure_unit_id"]

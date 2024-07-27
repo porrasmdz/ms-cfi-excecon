@@ -14,7 +14,6 @@ ccount_product_table = Table(
     Column("product_id", ForeignKey("product.id"), primary_key=True)
 )
 
-
 class BaseSQLModel(Base):
     __abstract__ = True
     id : Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)

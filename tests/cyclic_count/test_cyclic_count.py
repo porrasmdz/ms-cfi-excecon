@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from app import schemas
+from app import schemas, models
 import uuid
 
 template_cyclic_count = {"name": "Test Count"}
@@ -16,7 +16,8 @@ def test_read_cyclic_counts(client: TestClient):
     response = client.get("/cyclic_counts/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_cyclic_count(client: TestClient):
     response = client.post("/cyclic_counts/", json=template_cyclic_count)
@@ -67,7 +68,8 @@ def test_read_count_registries(client):
     response = client.get("/count_registries/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_count_registry(client, sample_data):
     registry_id = str(sample_data["count_registry_id"])  # Asegúrate de usar un UUID válido existente
@@ -106,7 +108,8 @@ def test_read_activity_registries(client):
     response = client.get("/activity_registries/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    result = schemas.PaginatedResource(**data)
+    assert result is not None
 
 def test_update_activity_registry(client, sample_data):
     activity_id = str(sample_data["activity_registry"])  # Asegúrate de usar un UUID válido existente

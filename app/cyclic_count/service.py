@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
 from uuid import UUID
 from fastapi import HTTPException
-
+from typing import List, Any
+from app.schemas import TableQueryBody
+from app.models import BaseSQLModel
+from app.service import get_paginated_resource
 from .models import (CyclicCount, CountRegistry, ActivityRegistry)
 
 def update_validating_deletion_time(object, key, value):
@@ -13,8 +16,8 @@ def update_validating_deletion_time(object, key, value):
 
 ### CYCLIC_COUNT SERVICES ##########
 
-def get_cyclic_counts(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(CyclicCount).offset(skip).limit(limit).all()
+def get_cyclic_counts(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def create_cyclic_count(db: Session, cyclic_count: CyclicCount):
     db_cyclic_count = CyclicCount(**cyclic_count.model_dump())
@@ -49,8 +52,8 @@ def delete_cyclic_count(db: Session, cyclic_count_id: UUID):
 
 ### COUNT_REGISTRY SERVICES ##########
 
-def get_count_registries(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(CountRegistry).offset(skip).limit(limit).all()
+def get_count_registries(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def create_count_registry(db: Session, count_registry: CountRegistry):
     db_count_registry = CountRegistry(**count_registry.model_dump())
@@ -85,8 +88,8 @@ def delete_count_registry(db: Session, count_registry_id: UUID):
 
 ### ACTIVITY_REGISTRY SERVICES ##########
 
-def get_activity_registries(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(ActivityRegistry).offset(skip).limit(limit).all()
+def get_activity_registries(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def create_activity_registry(db: Session, activity_registry: ActivityRegistry):
     db_activity_registry = ActivityRegistry(**activity_registry.model_dump())

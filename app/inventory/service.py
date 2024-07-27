@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from uuid import UUID
-
+from typing import List, Any
+from app.service import get_paginated_resource
+from app.schemas import TableQueryBody, BaseSQLModel 
 from .models import (
     Warehouse, WarehouseType, WHLocation, WHLocation_Type,
     Product, ProductCategory, MeasureUnit
@@ -24,9 +26,8 @@ def get_wh_locations_for_warehouse(db: Session, warehouse_id: UUID):
 
 # CRUD Operations for Warehouse
 #TODO: Validate Company, Warehouse_Type exist
-def get_warehouses(session: Session, skip: int = 0, limit: int = 100):
-    wh_list = session.query(Warehouse).offset(skip).limit(limit).all()
-    return wh_list
+def get_warehouses(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_warehouse(session: Session, warehouse_id: UUID):
     warehouse = session.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
@@ -64,8 +65,8 @@ def delete_warehouse(session: Session, warehouse_id: UUID):
 
 # CRUD Operations for WarehouseType
 
-def get_warehouse_types(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(WarehouseType).offset(skip).limit(limit).all()
+def get_warehouse_types(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_warehouse_type(session: Session, warehouse_type_id: UUID):
     return session.query(WarehouseType).filter(WarehouseType.id == warehouse_type_id).first()
@@ -104,8 +105,8 @@ def delete_warehouse_type(session: Session, warehouse_type_id: UUID):
 # CRUD Operations for WHLocation
 #TODO: Check valid Warehouse_Location_Type, Parent_WHLocation, Warehouse exists
 
-def get_whlocations(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(WHLocation).offset(skip).limit(limit).all()
+def get_whlocations(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_whlocation(session: Session, whlocation_id: UUID):
     return session.query(WHLocation).filter(WHLocation.id == whlocation_id).first()
@@ -141,8 +142,8 @@ def delete_whlocation(session: Session, whlocation_id: UUID):
 
 # CRUD Operations for WHLocation_Type
 
-def get_whlocation_types(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(WHLocation_Type).offset(skip).limit(limit).all()
+def get_whlocation_types(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_whlocation_type(session: Session, whlocation_type_id: UUID):
     return session.query(WHLocation_Type).filter(WHLocation_Type.id == whlocation_type_id).first()
@@ -178,8 +179,8 @@ def delete_whlocation_type(session: Session, whlocation_type_id: UUID):
 
 # CRUD Operations for Product
 #TODO: Check MeasureUnits, ProductCategory, Warehouses, Warehouse Locations exist
-def get_products(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(Product).offset(skip).limit(limit).all()
+def get_products(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_product(session: Session, product_id: UUID):
     return session.query(Product).filter(Product.id == product_id).first()
@@ -215,8 +216,8 @@ def delete_product(session: Session, product_id: UUID):
 
 # CRUD Operations for ProductCategory
 
-def get_product_categories(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(ProductCategory).offset(skip).limit(limit).all()
+def get_product_categories(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_product_category(session: Session, product_category_id: UUID):
     return session.query(ProductCategory).filter(ProductCategory.id == product_category_id).first()
@@ -252,8 +253,8 @@ def delete_product_category(session: Session, product_category_id: UUID):
 
 # CRUD Operations for MeasureUnit
 #TODO: Check valid parent measure unit
-def get_measure_units(session: Session, skip: int = 0, limit: int = 100):
-    return session.query(MeasureUnit).offset(skip).limit(limit).all()
+def get_measure_units(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
+    return get_paginated_resource(model, filters, tqb, session)
 
 def get_measure_unit(session: Session, measure_unit_id: UUID):
     return session.query(MeasureUnit).filter(MeasureUnit.id == measure_unit_id).first()

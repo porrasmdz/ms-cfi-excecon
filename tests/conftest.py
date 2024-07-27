@@ -9,6 +9,7 @@ from app.config import  settings
 from app.database import Base, get_session
 from app.inventory.models import Product, MeasureUnit, ProductCategory, Warehouse, WarehouseType, WHLocation_Type, WHLocation
 from app.cyclic_count.models import CyclicCount, CountRegistry, ActivityRegistry
+from app.companies.models import Company, CorporativeGroup, Contact
 from datetime import datetime
 
 SQLALCHEMY_DATABASE_URL = settings.TEST_DB_URL
@@ -16,6 +17,27 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+@pytest.fixture(scope="module")
+def sample_companies_data(db: Session):
+    # Crear datos necesarios para las pruebas
+    corp_group = CorporativeGroup(name="Group AAA", description="description",
+                               created_at=datetime.now(), updated_at=datetime.now())
+    company = Company(name="Unit 1", email="comp2@organization.com", 
+                      ruc="0999999999001", corporate_group=corp_group,
+                               created_at=datetime.now(), updated_at=datetime.now())
+    contact = Contact(full_name="User Test", contact_number="0999999999", employee_charge="Employee",
+                       email="user@organization.com", company=company,
+                        created_at=datetime.now(), updated_at=datetime.now())
+    db.add(corp_group)
+    db.add(company)
+    db.add(contact)
+    db.commit()
+    return {
+        "company_id" : company.id,
+        "corp_group_id" : corp_group.id,
+        "contact_id" : contact.id,
+    }
 
 @pytest.fixture(scope="module")
 def sample_product_category_mu_data(db: Session):

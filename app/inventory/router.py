@@ -2,16 +2,23 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List, Any
-
-
+from app.schemas import PaginatedResource, TableQueryBody
+from app.dependencies import get_table_query_body
+from app.utils import filters_to_sqlalchemy
+from .models import Warehouse, WarehouseType, WHLocation, WHLocation_Type, Product, ProductCategory, MeasureUnit
 from . import service, schemas
 from ..database import get_session
 
 router = APIRouter()
-@router.get("/warehouses/", response_model=List[schemas.ReadWarehouse])
-def read_warehouses(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    warehouses = service.get_warehouses(session, skip=skip, limit=limit)
-    return warehouses
+@router.get("/warehouses/", response_model=PaginatedResource[schemas.ReadWarehouse])
+def read_warehouses(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=Warehouse, filters=tqb.filters) 
+    (total_registries, registries)= service.get_warehouses(model=Warehouse, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/warehouses/{warehouse_id}", response_model=schemas.DetailedWarehouse)
 def read_warehouse(warehouse_id: UUID, session: Session = Depends(get_session)):
@@ -33,10 +40,15 @@ def delete_warehouse(warehouse_id: UUID, session: Session = Depends(get_session)
     return service.delete_warehouse(session=session, warehouse_id=warehouse_id)
 
 # WarehouseType routes
-@router.get("/warehouse_types/", response_model=List[schemas.ReadWarehouseType])
-def read_warehouse_types(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    warehouse_types = service.get_warehouse_types(session, skip=skip, limit=limit)
-    return warehouse_types
+@router.get("/warehouse_types/", response_model=PaginatedResource[schemas.ReadWarehouseType])
+def read_warehouse_types(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=WarehouseType, filters=tqb.filters) 
+    (total_registries, registries)= service.get_warehouse_types(model=WarehouseType, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/warehouse_types/{warehouse_type_id}", response_model=schemas.DetailedWarehouseType)
 def read_warehouse_type(warehouse_type_id: UUID, session: Session = Depends(get_session)):
@@ -58,10 +70,15 @@ def delete_warehouse_type(warehouse_type_id: UUID, session: Session = Depends(ge
     return service.delete_warehouse_type(session=session, warehouse_type_id=warehouse_type_id)
 
 # WHLocation routes
-@router.get("/whlocations/", response_model=List[schemas.ReadWHLocation])
-def read_whlocations(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    whlocations = service.get_whlocations(session, skip=skip, limit=limit)
-    return whlocations
+@router.get("/whlocations/", response_model=PaginatedResource[schemas.ReadWHLocation])
+def read_whlocations(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=WHLocation, filters=tqb.filters) 
+    (total_registries, registries)= service.get_whlocations(model=WHLocation, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/whlocations/{whlocation_id}", response_model=schemas.ReadWHLocation)
 def read_whlocation(whlocation_id: UUID, session: Session = Depends(get_session)):
@@ -84,10 +101,15 @@ def delete_whlocation(whlocation_id: UUID, session: Session = Depends(get_sessio
 
 
 # WHLocation_Type routes
-@router.get("/whlocation_types/", response_model=List[schemas.ReadWHLocationType])
-def read_whlocation_types(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    whlocation_types = service.get_whlocation_types(session, skip=skip, limit=limit)
-    return whlocation_types
+@router.get("/whlocation_types/", response_model=PaginatedResource[schemas.ReadWHLocationType])
+def read_whlocation_types(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=WHLocation_Type, filters=tqb.filters) 
+    (total_registries, registries)= service.get_whlocation_types(model=WHLocation_Type, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/whlocation_types/{whlocation_type_id}", response_model=schemas.ReadWHLocationType)
 def read_whlocation_type(whlocation_type_id: UUID, session: Session = Depends(get_session)):
@@ -109,10 +131,15 @@ def delete_whlocation_type(whlocation_type_id: UUID, session: Session = Depends(
     return service.delete_whlocation_type(session=session, whlocation_type_id=whlocation_type_id)
 
 # Product routes
-@router.get("/products/", response_model=List[schemas.ReadProduct])
-def read_products(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    products = service.get_products(session, skip=skip, limit=limit)
-    return products
+@router.get("/products/", response_model=PaginatedResource[schemas.ReadProduct])
+def read_products(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=Product, filters=tqb.filters) 
+    (total_registries, registries)= service.get_products(model=Product, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/products/{product_id}", response_model=schemas.ReadProduct)
 def read_product(product_id: UUID, session: Session = Depends(get_session)):
@@ -134,10 +161,15 @@ def delete_product(product_id: UUID, session: Session = Depends(get_session)):
     return service.delete_product(session=session, product_id=product_id)
 
 # ProductCategory routes
-@router.get("/product_categories/", response_model=List[schemas.ReadProductCategory])
-def read_product_categories(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    product_categories = service.get_product_categories(session, skip=skip, limit=limit)
-    return product_categories
+@router.get("/product_categories/", response_model=PaginatedResource[schemas.ReadProductCategory])
+def read_product_categories(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=ProductCategory, filters=tqb.filters) 
+    (total_registries, registries)= service.get_product_categories(model=ProductCategory, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/product_categories/{product_category_id}", response_model=schemas.ReadProductCategory)
 def read_product_category(product_category_id: UUID, session: Session = Depends(get_session)):
@@ -159,10 +191,15 @@ def delete_product_category(product_category_id: UUID, session: Session = Depend
     return service.delete_product_category(session=session, product_category_id=product_category_id)
 
 # MeasureUnit routes
-@router.get("/measure_units/", response_model=List[schemas.ReadMeasureUnit])
-def read_measure_units(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    measure_units = service.get_measure_units(session, skip=skip, limit=limit)
-    return measure_units
+@router.get("/measure_units/", response_model=PaginatedResource[schemas.ReadMeasureUnit])
+def read_measure_units(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=MeasureUnit, filters=tqb.filters) 
+    (total_registries, registries)= service.get_measure_units(model=MeasureUnit, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_registries, results=registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/measure_units/{measure_unit_id}", response_model=schemas.ReadMeasureUnit)
 def read_measure_unit(measure_unit_id: UUID, session: Session = Depends(get_session)):

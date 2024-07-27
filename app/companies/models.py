@@ -35,7 +35,7 @@ class Contact(BaseSQLModel):
     __tablename__ = "contact"
     full_name : Mapped[str] = mapped_column()
     contact_number : Mapped[str] = mapped_column()
-    alt_contact_number : Mapped[str] = mapped_column()
+    alt_contact_number : Mapped[Optional[str]] = mapped_column()
     employee_charge : Mapped[str] = mapped_column()
     email : Mapped[str] = mapped_column()
 

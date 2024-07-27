@@ -2,19 +2,27 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
-
+from app.utils import filters_to_sqlalchemy
+from app.dependencies import get_table_query_body
+from app.companies.models import Company, CorporativeGroup, Contact
+from app.schemas import TableQueryBody, PaginatedResource
 from . import service, schemas
 from ..database import get_session
 
 router = APIRouter()
 
 # Company routes
-@router.get("/companies/", response_model=List[schemas.ReadCompany])
-def read_companies(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    companies = service.get_companies(session, skip=skip, limit=limit)
-    return companies
+@router.get("/companies/", response_model=PaginatedResource[schemas.ReadCompany])
+def read_companies(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=Company, filters=tqb.filters) 
+    (totalCompanies, companies)= service.get_companies(model=Company, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=totalCompanies, results=companies, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
-@router.get("/companies/{company_id}", response_model=schemas.ReadCompany)
+@router.get("/companies/{company_id}", response_model=schemas.DetailedCompany)
 def read_company(company_id: UUID, session: Session = Depends(get_session)):
     session_company = service.get_company(session, company_id=company_id)
     if session_company is None:
@@ -34,35 +42,45 @@ def delete_company(company_id: UUID, session: Session = Depends(get_session)):
     return service.delete_company(session=session, company_id=company_id)
 
 # CorporativeGroup routes
-@router.get("/corporative_groups/", response_model=List[schemas.ReadCorporateGroup])
-def read_corporative_groups(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    corporative_groups = service.get_corporate_groups(session, skip=skip, limit=limit)
-    return corporative_groups
+@router.get("/corporative_groups/", response_model=PaginatedResource[schemas.ReadCorporateGroup])
+def read_corporative_groups(tqb: TableQueryBody = Depends(get_table_query_body) 
+                            , session: Session = Depends(get_session)):
+    filters = filters_to_sqlalchemy(model=CorporativeGroup, filters=tqb.filters) 
+    (totalCorporateGroups, corp_groups)= service.get_corporate_groups(model=CorporativeGroup, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=totalCorporateGroups, results=corp_groups, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
-@router.get("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporateGroup)
+@router.get("/corporative_groups/{corporative_group_id}", response_model=schemas.DetailedCorporateGroup)
 def read_corporative_group(corporative_group_id: UUID, session: Session = Depends(get_session)):
-    session_corporative_group = service.get_corporate_group(session, corporative_group_id=corporative_group_id)
+    session_corporative_group = service.get_corporate_group(session, corporate_group_id=corporative_group_id)
     if session_corporative_group is None:
         raise HTTPException(status_code=404, detail="CorporativeGroup not found")
     return session_corporative_group
 
 @router.post("/corporative_groups/", response_model=schemas.ReadCorporateGroup)
 def create_corporative_group(corporative_group: schemas.CreateCorporateGroup, session: Session = Depends(get_session)):
-    return service.create_corporative_group(session=session, corporative_group=corporative_group)
+    return service.create_corporate_group(session=session, corporate_group=corporative_group)
 
 @router.put("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporateGroup)
 def update_corporative_group(corporative_group_id: UUID, corporative_group: schemas.UpdateCorporateGroup, session: Session = Depends(get_session)):
-    return service.update_corporative_group(session=session, corporative_group_id=corporative_group_id, corporative_group=corporative_group)
+    return service.update_corporate_group(session=session, corporate_group=corporative_group, corporate_group_id=corporative_group_id)
 
 @router.delete("/corporative_groups/{corporative_group_id}", response_model=schemas.ReadCorporateGroup)
 def delete_corporative_group(corporative_group_id: UUID, session: Session = Depends(get_session)):
-    return service.delete_corporative_group(session=session, corporative_group_id=corporative_group_id)
+    return service.delete_corporate_group(session=session, corporate_group_id=corporative_group_id)
 
 # Contact routes
-@router.get("/contacts/", response_model=List[schemas.ReadContact])
-def read_contacts(skip: int = 0, limit: int = 10, session: Session = Depends(get_session)):
-    contacts = service.get_contacts(session, skip=skip, limit=limit)
-    return contacts
+@router.get("/contacts/", response_model=PaginatedResource[schemas.ReadContact])
+def read_contacts(tqb: TableQueryBody = Depends(get_table_query_body) 
+                            , session: Session = Depends(get_session)):
+    filters = filters_to_sqlalchemy(model=Contact, filters=tqb.filters) 
+    (totalContacts, contacts)= service.get_contacts(model=Contact, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=totalContacts, results=contacts, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.get("/contacts/{contact_id}", response_model=schemas.ReadContact)
 def read_contact(contact_id: UUID, session: Session = Depends(get_session)):

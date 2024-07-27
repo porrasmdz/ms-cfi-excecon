@@ -2,16 +2,26 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
-from . import schemas, service, models
+from app.schemas import PaginatedResource, TableQueryBody
+from app.dependencies import get_table_query_body
+from app.utils import filters_to_sqlalchemy
+from . import schemas, service
+from .models import CyclicCount, CountRegistry, ActivityRegistry
 from ..database import get_session
 
 router = APIRouter()
 
 ### CYCLIC_COUNT ROUTES ##########
 
-@router.get("/cyclic_counts/", response_model=List[schemas.ReadCyclicCount])
-def read_cyclic_counts(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
-    return service.get_cyclic_counts(db, skip=skip, limit=limit)
+@router.get("/cyclic_counts/", response_model=PaginatedResource[schemas.ReadCyclicCount])
+def read_cyclic_counts(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=CyclicCount, filters=tqb.filters) 
+    (total_ccounts, cyclic_counts)= service.get_cyclic_counts(model=CyclicCount, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_ccounts, results=cyclic_counts, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.post("/cyclic_counts/", response_model=schemas.ReadCyclicCount)
 def create_cyclic_count(cyclic_count: schemas.CreateCyclicCount, db: Session = Depends(get_session)):
@@ -31,9 +41,15 @@ def delete_cyclic_count(cyclic_count_id: UUID, db: Session = Depends(get_session
 
 ### COUNT_REGISTRY ROUTES ##########
 
-@router.get("/count_registries/", response_model=List[schemas.ReadCountRegistry])
-def read_count_registries(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
-    return service.get_count_registries(db, skip=skip, limit=limit)
+@router.get("/count_registries/", response_model=PaginatedResource[schemas.ReadCountRegistry])
+def read_count_registries(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=CountRegistry, filters=tqb.filters) 
+    (total_cregistries, cregistries)= service.get_count_registries(model=CountRegistry, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_cregistries, results=cregistries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.post("/count_registries/", response_model=schemas.ReadCountRegistry)
 def create_count_registry(count_registry: schemas.CreateCountRegistry, db: Session = Depends(get_session)):
@@ -53,9 +69,15 @@ def delete_count_registry(count_registry_id: UUID, db: Session = Depends(get_ses
 
 ### ACTIVITY_REGISTRY ROUTES ##########
 
-@router.get("/activity_registries/", response_model=List[schemas.ReadActivityRegistry])
-def read_activity_registries(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
-    return service.get_activity_registries(db, skip=skip, limit=limit)
+@router.get("/activity_registries/", response_model=PaginatedResource[schemas.ReadActivityRegistry])
+def read_activity_registries(tqb: TableQueryBody = Depends(get_table_query_body), 
+                   session: Session = Depends(get_session) ):
+    filters = filters_to_sqlalchemy(model=ActivityRegistry, filters=tqb.filters) 
+    (total_aregistries, activity_registries)= service.get_activity_registries(model=ActivityRegistry, filters=filters, 
+                                                       tqb=tqb, session=session)
+    response = PaginatedResource(totalResults=total_aregistries, results=activity_registries, 
+                                 skip= tqb.skip, limit=tqb.limit)
+    return response
 
 @router.post("/activity_registries/", response_model=schemas.ReadActivityRegistry)
 def create_activity_registry(activity_registry: schemas.CreateActivityRegistry, db: Session = Depends(get_session)):
