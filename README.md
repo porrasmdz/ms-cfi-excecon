@@ -4,7 +4,7 @@ https://github.com/tiangolo/full-stack-fastapi-template
 
 Super Basic Guide:
 https://medium.com/@stanker801/creating-a-crud-api-with-fastapi-sqlalchemy-postgresql-postman-pydantic-1ba6b9de9f23
-The advanced one is in .txt
+
 
 Advanced Guide:
 pt.1 - https://fastapi.tiangolo.com/tutorial/sql-databases/

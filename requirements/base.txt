@@ -7,3 +7,4 @@ httpx
 pytest-postgresql
 psycopg2-binary
 fastapi
+alembic
