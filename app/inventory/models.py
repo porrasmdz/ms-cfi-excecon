@@ -137,3 +137,5 @@ class MeasureUnit(BaseSQLModel):
 
 
 from app.cyclic_count.models import CyclicCount, CountRegistry
+
+metadata = Base.metadata

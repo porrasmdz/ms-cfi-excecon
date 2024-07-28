@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional
 from uuid import UUID
-from ..models import BaseSQLModel
+from ..models import BaseSQLModel,Base
 from datetime import date
 
 class Company(BaseSQLModel):
@@ -42,3 +42,4 @@ class Contact(BaseSQLModel):
     company_id : Mapped[UUID] = mapped_column(ForeignKey("company.id"))
     company : Mapped["Company"] = relationship(back_populates="contacts")
     
+metadata = Base.metadata

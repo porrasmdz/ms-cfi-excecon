@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional, Literal
 from uuid import UUID, uuid4
-from ..models import BaseSQLModel, ccount_product_table
+from ..models import BaseSQLModel, Base, ccount_product_table
 from datetime import datetime
 from ..inventory.models import Product
 class CyclicCount(BaseSQLModel):
@@ -55,3 +55,4 @@ class ActivityRegistry(BaseSQLModel):
     count_registry_id : Mapped[UUID] = mapped_column(ForeignKey("count_registry.id"))
     count_registry : Mapped["CountRegistry"] = relationship(back_populates="activity_registries")
 
+metadata = Base.metadata

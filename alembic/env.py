@@ -16,9 +16,11 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+from app.companies import models as cmodels
+from app.inventory import models as imodels
+from app.cyclic_count import models as ccmodels
+target_metadata = [ ccmodels.metadata ]
+# target_metadata = None 
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

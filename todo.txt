@@ -3,7 +3,7 @@ Inventory Module:
 2. Crear los CRUD operations en services.py [DONE]
 3. Crear las rutas [Done]
 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
-3.2 Implementar Alembic
+3.2 Implementar Alembic [Done]
 4. Crear el frontend con react admin
 
 Cyclic Count Module:
@@ -11,7 +11,7 @@ Cyclic Count Module:
 2. Crear los CRUD operations en services.py [DONE]
 3. Crear las rutas [DONE]
 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
-3.2 Implementar Alembic
+3.2 Implementar Alembic [Done]
 4. Crear el frontend con react admin
 
 Company Listing Module:
@@ -19,7 +19,7 @@ Company Listing Module:
 2. Crear los CRUD operations en services.py [DONE]
 3. Crear las rutas [DONE]
 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
-3.2 Implementar Alembic
+3.2 Implementar Alembic [Done]
 4. Crear el frontend con react admin
 
 Auth Module:

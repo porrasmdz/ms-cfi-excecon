@@ -10,7 +10,6 @@ engine = create_engine(
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
-
 def get_session():
     session = Session()
     try:
@@ -20,3 +19,4 @@ def get_session():
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+
