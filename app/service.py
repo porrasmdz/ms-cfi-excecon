@@ -10,7 +10,6 @@ def get_paginated_resource(model:BaseSQLModel, filters: List[Any], tqb: TableQue
     sort_order= tqb.sort_order
     table_query = session.query(model)
     #TODO Catch exceptions
-    #TODO parametrize model and pagination
     for filter in filters:
         if filter is not None:
             table_query = table_query.filter(filter)

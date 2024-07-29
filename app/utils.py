@@ -8,6 +8,8 @@ def build_filter_clause(field, match_mode: MatchMode, value: Any ):
         return (field == value)
     if match_mode == MatchMode.CONTAINS:    
         return (field.like(f"%{value}%"))
+    if match_mode == MatchMode.IN:    
+        return (field.in_(value))
     return None #Unknown filter usage
     
 

@@ -26,6 +26,7 @@ class DetailedCompany(ReadSchema):
     ruc: str
     foundation_date: Optional[date]
     contacts: Optional[List["ReadContact"]]
+    corporate_group: "ReadCorporateGroup"
 
 class CreateCompany(CreateSchema):
     name: str

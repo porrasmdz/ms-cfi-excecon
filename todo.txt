@@ -35,3 +35,8 @@ Testing
 1. Unit testing for Inventory models [DONE]
 2. Unit testing for Cyclic Count models [DONE]
 3. Unit testing for companies models [DONE]
+
+DOCS
+1. Populate OpenAPI Docs (api tags, model examples, return codes, error codes)
+2. Map exceptions to HTTP_exceptions 
+3. Add needed headers to responses

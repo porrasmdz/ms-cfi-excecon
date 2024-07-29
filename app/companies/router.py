@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
-from typing import List
 from app.utils import filters_to_sqlalchemy
 from app.dependencies import get_table_query_body
 from app.companies.models import Company, CorporativeGroup, Contact
@@ -12,15 +11,20 @@ from ..database import get_session
 router = APIRouter()
 
 # Company routes
-@router.get("/companies/", response_model=PaginatedResource[schemas.ReadCompany])
-def read_companies(tqb: TableQueryBody = Depends(get_table_query_body), 
+@router.get("/companies/", response_model=PaginatedResource[schemas.DetailedCompany])
+def read_companies(response: Response,
+                   tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=Company, filters=tqb.filters) 
-    (totalCompanies, companies)= service.get_companies(model=Company, filters=filters, 
+    (total_results, results)= service.get_companies(model=Company, filters=filters, 
                                                        tqb=tqb, session=session)
-    response = PaginatedResource(totalResults=totalCompanies, results=companies, 
+    
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
+    response.headers["Content-Range"] = f"companies {tqb.skip}-{tqb.limit}/{total_results}"
+    response_resource = PaginatedResource(totalResults=total_results, results=results, 
                                  skip= tqb.skip, limit=tqb.limit)
-    return response
+    
+    return response_resource
 
 @router.get("/companies/{company_id}", response_model=schemas.DetailedCompany)
 def read_company(company_id: UUID, session: Session = Depends(get_session)):
@@ -43,14 +47,18 @@ def delete_company(company_id: UUID, session: Session = Depends(get_session)):
 
 # CorporativeGroup routes
 @router.get("/corporative_groups/", response_model=PaginatedResource[schemas.ReadCorporateGroup])
-def read_corporative_groups(tqb: TableQueryBody = Depends(get_table_query_body) 
-                            , session: Session = Depends(get_session)):
+def read_corporative_groups(response: Response,
+                            tqb: TableQueryBody = Depends(get_table_query_body), 
+                            session: Session = Depends(get_session)):
     filters = filters_to_sqlalchemy(model=CorporativeGroup, filters=tqb.filters) 
-    (totalCorporateGroups, corp_groups)= service.get_corporate_groups(model=CorporativeGroup, filters=filters, 
+    (total_results, results)= service.get_corporate_groups(model=CorporativeGroup, filters=filters, 
                                                        tqb=tqb, session=session)
-    response = PaginatedResource(totalResults=totalCorporateGroups, results=corp_groups, 
+    
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
+    response.headers["Content-Range"] = f"groups {tqb.skip}-{tqb.limit}/{total_results}"
+    response_resource = PaginatedResource(totalResults=total_results, results=results, 
                                  skip= tqb.skip, limit=tqb.limit)
-    return response
+    return response_resource
 
 @router.get("/corporative_groups/{corporative_group_id}", response_model=schemas.DetailedCorporateGroup)
 def read_corporative_group(corporative_group_id: UUID, session: Session = Depends(get_session)):
@@ -73,12 +81,16 @@ def delete_corporative_group(corporative_group_id: UUID, session: Session = Depe
 
 # Contact routes
 @router.get("/contacts/", response_model=PaginatedResource[schemas.ReadContact])
-def read_contacts(tqb: TableQueryBody = Depends(get_table_query_body) 
-                            , session: Session = Depends(get_session)):
+def read_contacts(response: Response,
+                tqb: TableQueryBody = Depends(get_table_query_body),
+                session: Session = Depends(get_session)):
     filters = filters_to_sqlalchemy(model=Contact, filters=tqb.filters) 
-    (totalContacts, contacts)= service.get_contacts(model=Contact, filters=filters, 
+    (total_results, results)= service.get_contacts(model=Contact, filters=filters, 
                                                        tqb=tqb, session=session)
-    response = PaginatedResource(totalResults=totalContacts, results=contacts, 
+    
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
+    response.headers["Content-Range"] = f"contacts {tqb.skip}-{tqb.limit}/{total_results}"
+    response = PaginatedResource(totalResults=total_results, results=results, 
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
