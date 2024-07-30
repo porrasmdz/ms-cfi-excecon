@@ -3,7 +3,7 @@ from pydantic import EmailStr, Field
 from uuid import UUID
 from datetime import date, datetime
 from ..schemas import CreateSchema, ReadSchema, UpdateSchema
-
+from app.inventory.schemas import ReadWarehouse , CreateWarehouse
 
 ###CYCLIC_COUNT##########
 class ReadCyclicCount(ReadSchema):
@@ -14,6 +14,7 @@ class ReadCyclicCount(ReadSchema):
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
 
+    warehouses: Optional[List["ReadWarehouse"]] 
     parent_id: Optional[UUID] = None
     
 class CreateCyclicCount(CreateSchema):
@@ -22,7 +23,7 @@ class CreateCyclicCount(CreateSchema):
     count_type: str = "Primer Conteo"
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
-
+    warehouse_ids: List["UUID"]
     parent_id: Optional[UUID] = None
     
 class UpdateCyclicCount(UpdateSchema):
@@ -32,6 +33,7 @@ class UpdateCyclicCount(UpdateSchema):
     count_date_start: Optional[datetime] = None
     count_date_finish: Optional[datetime] = None
 
+    warehouse_ids: Optional[List["UUID"]] = None
     parent_id: Optional[UUID] = None
     
 ###COUNT_REGISTRY

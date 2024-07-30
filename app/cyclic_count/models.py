@@ -2,9 +2,9 @@ from sqlalchemy import Boolean, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional, Literal
 from uuid import UUID, uuid4
-from ..models import BaseSQLModel, Base, ccount_product_table
+from ..models import BaseSQLModel, Base, ccount_product_table, warehouse_ccount_table
 from datetime import datetime
-from ..inventory.models import Product
+from ..inventory.models import Product, Warehouse
 class CyclicCount(BaseSQLModel):
     __tablename__ = "cyclic_count"
     id : Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -18,7 +18,9 @@ class CyclicCount(BaseSQLModel):
         secondary=ccount_product_table, back_populates="cyclic_counts"
     )
     count_registries : Mapped[Optional[List["CountRegistry"]]] = relationship(back_populates="cyclic_count")
-    
+    #Many2Many reference
+    warehouses : Mapped[List["Warehouse"]] = relationship(
+        secondary=warehouse_ccount_table, back_populates="cyclic_counts")
     #Recursive reference
     parent_id : Mapped[Optional[UUID]] = mapped_column(ForeignKey("cyclic_count.id"))#Parent Location
     previous_ccount : Mapped[Optional["CyclicCount"]] = relationship(

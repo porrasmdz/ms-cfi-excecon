@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional
 from uuid import UUID, uuid4
-from ..models import BaseSQLModel, Base, ccount_product_table
+from ..models import BaseSQLModel, Base, ccount_product_table, warehouse_ccount_table
 
 warehouse_product_table = Table(
     "warehouse_product_table",
@@ -37,6 +37,9 @@ class Warehouse(BaseSQLModel):
     #Many to Many
     products: Mapped[Optional[List["Product"]]] = relationship(
         secondary=warehouse_product_table, back_populates="warehouses"
+    )
+    cyclic_counts: Mapped[Optional[List["CyclicCount"]]] = relationship(
+        secondary=warehouse_ccount_table, back_populates="warehouses"
     )
 
 class WarehouseType(BaseSQLModel):

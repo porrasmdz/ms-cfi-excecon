@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app import schemas, models
 import uuid
 
-template_cyclic_count = {"name": "Test Count"}
+template_cyclic_count = {"name": "Test Count", "warehouse_ids": []}
 
 def test_create_cyclic_count(client: TestClient):
     response = client.post("/cyclic_counts/", json=template_cyclic_count)
@@ -24,7 +24,7 @@ def test_update_cyclic_count(client: TestClient):
     data = response.json()
     count_id = data["id"]
 
-    update_data = {"name": "Updated Test Count"}
+    update_data = {"name": "Updated Test Count","warehouse_ids":[]}
     response = client.put(f"/cyclic_counts/{count_id}", json=update_data)
     assert response.status_code == 200
     data = response.json()

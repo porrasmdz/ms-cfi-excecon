@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from typing import List, Any
 from app.schemas import TableQueryBody
 from app.models import BaseSQLModel
+from app.inventory.models import Warehouse
 from app.service import get_paginated_resource
 from .models import (CyclicCount, CountRegistry, ActivityRegistry)
 
@@ -20,7 +21,17 @@ def get_cyclic_counts(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBod
     return get_paginated_resource(model, filters, tqb, session)
 
 def create_cyclic_count(db: Session, cyclic_count: CyclicCount):
-    db_cyclic_count = CyclicCount(**cyclic_count.model_dump())
+    cyclic_dict ={**cyclic_count.model_dump()}
+    cyclic_dict["warehouses"] = []
+    if "warehouse_ids" in cyclic_dict.keys():
+        if len(cyclic_dict["warehouse_ids"]) > 0:  
+            for wh_id in cyclic_dict["warehouse_ids"]:
+                warehouse = db.query(Warehouse).filter(Warehouse.id == wh_id).first()
+                if warehouse is not None:
+                    cyclic_dict["warehouses"].append(warehouse)
+        cyclic_dict.pop("warehouse_ids")
+
+    db_cyclic_count = CyclicCount(**cyclic_dict)
     db.add(db_cyclic_count)
     db.commit()
     db.refresh(db_cyclic_count)
@@ -33,10 +44,24 @@ def get_cyclic_count(db: Session, cyclic_count_id: UUID):
     return db_cyclic_count
 
 def update_cyclic_count(db: Session, cyclic_count_id: UUID, cyclic_count: CyclicCount):
+    cyclic_dict ={**cyclic_count.model_dump(exclude_unset=True)}
+    if "warehouse_ids" in cyclic_dict.keys():
+        if len(cyclic_dict["warehouse_ids"]) > 0:  
+            
+            cyclic_dict["warehouses"] = []
+            for wh_id in cyclic_dict["warehouse_ids"]:
+                warehouse = db.query(Warehouse).filter(Warehouse.id == wh_id).first()
+                if warehouse is not None:
+                    cyclic_dict["warehouses"].append(warehouse)
+        else:
+            cyclic_dict["warehouses"] = []
+        cyclic_dict.pop("warehouse_ids")
+        
     db_cyclic_count = db.query(CyclicCount).filter(CyclicCount.id == cyclic_count_id).first()
     if db_cyclic_count is None:
         raise HTTPException(status_code=404, detail="CyclicCount not found")
-    for key, value in cyclic_count.model_dump(exclude_unset=True).items():
+    
+    for key, value in cyclic_dict.items():
         setattr(db_cyclic_count, key, value)
     db.commit()
     db.refresh(db_cyclic_count)

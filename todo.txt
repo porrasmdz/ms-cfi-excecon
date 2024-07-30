@@ -31,6 +31,8 @@ Auth Module:
 4. Crear el frontend con react admin
 
 PRE-RELEASE:
+0. VALIDATE IF I DONT NEED TO USE INIT_DB WHEN USING ALEMBIC MIGRATIONS
+0.1 ADD "IF RELATED FIELD NOT FOUND THROW HTTP EXCEPTION 404"
 1. Complete Business Logic
     1.1. Create a Cyclic Count
     1.2. Generate Report and Cyclic Count Results

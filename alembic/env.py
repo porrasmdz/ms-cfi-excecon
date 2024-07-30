@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from app.companies import models as cmodels
 from app.inventory import models as imodels
+from app import models as bmodels
 from app.cyclic_count import models as ccmodels
 target_metadata = [ ccmodels.metadata ]
 # target_metadata = None 

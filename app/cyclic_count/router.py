@@ -53,6 +53,7 @@ def read_count_registries(tqb: TableQueryBody = Depends(get_table_query_body),
 
 @router.post("/count_registries/", response_model=schemas.ReadCountRegistry)
 def create_count_registry(count_registry: schemas.CreateCountRegistry, db: Session = Depends(get_session)):
+    print("RECEIVED CR",count_registry )
     return service.create_count_registry(db, count_registry=count_registry)
 
 @router.get("/count_registries/{count_registry_id}", response_model=schemas.ReadCountRegistry)

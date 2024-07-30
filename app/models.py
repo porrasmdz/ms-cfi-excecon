@@ -13,6 +13,12 @@ ccount_product_table = Table(
     Column("cyclic_count_id", ForeignKey("cyclic_count.id"), primary_key=True),
     Column("product_id", ForeignKey("product.id"), primary_key=True)
 )
+warehouse_ccount_table = Table(
+    "warehouse_ccount_table",
+    Base.metadata,
+    Column("warehouse_id", ForeignKey("warehouse.id"), primary_key=True),
+    Column("cyclic_count_id", ForeignKey("cyclic_count.id"), primary_key=True)
+)
 
 class BaseSQLModel(Base):
     __abstract__ = True
