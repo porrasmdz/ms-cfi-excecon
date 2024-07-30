@@ -27,6 +27,7 @@ class DetailedCompany(ReadSchema):
     foundation_date: Optional[date]
     contacts: Optional[List["ReadContact"]]
     corporate_group: "ReadCorporateGroup"
+    corporate_group_id: UUID
 
 class CreateCompany(CreateSchema):
     name: str

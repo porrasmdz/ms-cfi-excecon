@@ -19,8 +19,6 @@ def read_companies(response: Response,
     (total_results, results)= service.get_companies(model=Company, filters=filters, 
                                                        tqb=tqb, session=session)
     
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
-    response.headers["Content-Range"] = f"companies {tqb.skip}-{tqb.limit}/{total_results}"
     response_resource = PaginatedResource(totalResults=total_results, results=results, 
                                  skip= tqb.skip, limit=tqb.limit)
     
@@ -54,8 +52,6 @@ def read_corporative_groups(response: Response,
     (total_results, results)= service.get_corporate_groups(model=CorporativeGroup, filters=filters, 
                                                        tqb=tqb, session=session)
     
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
-    response.headers["Content-Range"] = f"groups {tqb.skip}-{tqb.limit}/{total_results}"
     response_resource = PaginatedResource(totalResults=total_results, results=results, 
                                  skip= tqb.skip, limit=tqb.limit)
     return response_resource
@@ -88,8 +84,6 @@ def read_contacts(response: Response,
     (total_results, results)= service.get_contacts(model=Contact, filters=filters, 
                                                        tqb=tqb, session=session)
     
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
-    response.headers["Content-Range"] = f"contacts {tqb.skip}-{tqb.limit}/{total_results}"
     response = PaginatedResource(totalResults=total_results, results=results, 
                                  skip= tqb.skip, limit=tqb.limit)
     return response
