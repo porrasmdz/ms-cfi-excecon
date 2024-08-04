@@ -9,7 +9,7 @@ from ..schemas import CreateSchema, ReadSchema, UpdateSchema
 class ReadCompany(ReadSchema):
     id: UUID
     name: str
-    codename: Optional[str] = "CMY-AAA"
+    codename: Optional[str] = None
     phone_number: Optional[str]
     cellphone_number: Optional[str]
     email: EmailStr
@@ -19,7 +19,7 @@ class ReadCompany(ReadSchema):
 class DetailedCompany(ReadSchema):
     id: UUID
     name: str
-    codename: Optional[str] = "CMY-AAA"
+    codename: Optional[str] = None
     phone_number: Optional[str]
     cellphone_number: Optional[str]
     email: EmailStr
@@ -31,7 +31,7 @@ class DetailedCompany(ReadSchema):
 
 class CreateCompany(CreateSchema):
     name: str
-    codename: Optional[str] 
+    codename: Optional[str] = "CMY-AAA"
     phone_number: Optional[str]
     cellphone_number: Optional[str]
     email: EmailStr
@@ -77,6 +77,16 @@ class ReadContact(ReadSchema):
     alt_contact_number : Optional[str] 
     employee_charge : Optional[str] 
     email : EmailStr
+    company_id : UUID 
+
+class DetailedContact(ReadSchema):
+    id: UUID
+    full_name : str
+    contact_number : str
+    alt_contact_number : Optional[str] 
+    employee_charge : Optional[str] 
+    email : EmailStr
+    company: ReadCompany
     company_id : UUID 
 
 class CreateContact(CreateSchema):

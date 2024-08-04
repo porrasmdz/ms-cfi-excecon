@@ -4,7 +4,7 @@ Inventory Module:
 3. Crear las rutas [Done]
 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
 3.2 Implementar Alembic [DONE]
-4. Crear el frontend con react admin
+4. Crear el frontend con react admin [DONE]
 
 Cyclic Count Module:
 1. Crear los Modelos models.py [DONE]
@@ -12,7 +12,7 @@ Cyclic Count Module:
 3. Crear las rutas [DONE]
 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
 3.2 Implementar Alembic [Done]
-4. Crear el frontend con react admin
+4. Crear el frontend con react admin [DONE]
 
 Company Listing Module:
 1. Crear los Modelos models.py [DONE]
@@ -42,7 +42,7 @@ PRE-RELEASE:
 2. Implement Cyclic Count Kanban
 3. Deployment files
 4. Multitenancy
-
+5. Use enums instead of string where applies status, registry type, etc...
 Testing
 1. Unit testing for Inventory models [DONE]
 2. Unit testing for Cyclic Count models [DONE]

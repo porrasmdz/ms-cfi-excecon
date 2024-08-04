@@ -1,9 +1,9 @@
 from typing import Optional, List, Literal
-from pydantic import EmailStr, Field
+from pydantic import Field
 from uuid import UUID
-from datetime import date, datetime
+from datetime import datetime
 from ..schemas import CreateSchema, ReadSchema, UpdateSchema
-from app.inventory.schemas import ReadWarehouse , CreateWarehouse
+from app.inventory.schemas import ReadWarehouse, ReadProduct
 
 ###CYCLIC_COUNT##########
 class ReadCyclicCount(ReadSchema):
@@ -13,8 +13,18 @@ class ReadCyclicCount(ReadSchema):
     count_type: str = "Primer Conteo"
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
-
     warehouses: Optional[List["ReadWarehouse"]] 
+    parent_id: Optional[UUID] = None
+    
+class DetailedCyclicCount(ReadSchema):
+    id: UUID
+    name: str
+    status: Optional[str] = "Abierto"
+    count_type: str = "Primer Conteo"
+    count_date_start: datetime = Field(default_factory=datetime.now)
+    count_date_finish: datetime = Field(default_factory=datetime.now)
+    warehouses: Optional[List["ReadWarehouse"]] 
+    parent: Optional[ReadCyclicCount]
     parent_id: Optional[UUID] = None
     
 class CreateCyclicCount(CreateSchema):
@@ -45,6 +55,19 @@ class ReadCountRegistry(ReadSchema):
     difference_units: int
     difference_cost: int
 
+    product_id: UUID
+    cyclic_count_id: UUID
+
+class DetailedCountRegistry(ReadSchema):
+    id: UUID
+    registry_type: Literal["system", "physical", "consolidated"]
+    registry_units: int
+    registry_cost: int
+    difference_units: int
+    difference_cost: int
+
+    product: ReadProduct
+    cyclic_count: ReadCyclicCount
     product_id: UUID
     cyclic_count_id: UUID
 
@@ -80,6 +103,13 @@ class ReadActivityRegistry(ReadSchema):
     detail: str
     commentary: str
     user: UUID
+    count_registry_id: UUID
+class DetailedReadActivityRegistry(ReadSchema):
+    id: UUID
+    detail: str
+    commentary: str
+    user: UUID
+    count_registry: ReadCountRegistry
     count_registry_id: UUID
     
 class CreateActivityRegistry(CreateSchema):

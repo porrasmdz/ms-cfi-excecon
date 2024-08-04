@@ -44,7 +44,7 @@ def delete_company(company_id: UUID, session: Session = Depends(get_session)):
     return service.delete_company(session=session, company_id=company_id)
 
 # CorporativeGroup routes
-@router.get("/corporative_groups/", response_model=PaginatedResource[schemas.ReadCorporateGroup])
+@router.get("/corporative_groups/", response_model=PaginatedResource[schemas.DetailedCorporateGroup])
 def read_corporative_groups(response: Response,
                             tqb: TableQueryBody = Depends(get_table_query_body), 
                             session: Session = Depends(get_session)):
@@ -76,7 +76,7 @@ def delete_corporative_group(corporative_group_id: UUID, session: Session = Depe
     return service.delete_corporate_group(session=session, corporate_group_id=corporative_group_id)
 
 # Contact routes
-@router.get("/contacts/", response_model=PaginatedResource[schemas.ReadContact])
+@router.get("/contacts/", response_model=PaginatedResource[schemas.DetailedContact])
 def read_contacts(response: Response,
                 tqb: TableQueryBody = Depends(get_table_query_body),
                 session: Session = Depends(get_session)):
@@ -88,7 +88,7 @@ def read_contacts(response: Response,
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
-@router.get("/contacts/{contact_id}", response_model=schemas.ReadContact)
+@router.get("/contacts/{contact_id}", response_model=schemas.DetailedContact)
 def read_contact(contact_id: UUID, session: Session = Depends(get_session)):
     session_contact = service.get_contact(session, contact_id=contact_id)
     if session_contact is None:

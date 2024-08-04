@@ -164,16 +164,20 @@ def test_delete_wh_location_type(client, sample_data_warehouse):
     data = response.json()
 
 #######################PRODUCT
-def test_create_product(client, sample_product_data):
+def test_create_product(client,sample_data ,sample_data_warehouse ,sample_product_data):
     category_id = sample_product_data["category_id"]
+    warehouse_id = sample_data_warehouse["warehouse_id"]
     measure_unit_id = sample_product_data["measure_unit_id"]
+    cyclic_count_id = sample_data["cyclic_count_id"]
     response = client.post("/products/", json={
         "name": "Product 1",
         "code": "P001",
         "sku": "SKU001",
         "unit_cost": 10000,
         "measure_unit_id": str(measure_unit_id),
-        "category_id": str(category_id)
+        "category_id": str(category_id),
+        "warehouse_ids": [str(warehouse_id)],
+        "cyclic_count_ids": [str(cyclic_count_id)]
     })
     assert response.status_code == 200
     data = response.json()

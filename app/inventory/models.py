@@ -104,6 +104,7 @@ class Product(BaseSQLModel):
     cyclic_counts : Mapped[List["CyclicCount"]] = relationship(
         secondary=ccount_product_table, back_populates="products"
     )
+    #o2m
     count_registries : Mapped[Optional[List["CountRegistry"]]] = relationship(
         back_populates="product")
     

@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
-from typing import List, Any
 from app.schemas import PaginatedResource, TableQueryBody
 from app.dependencies import get_table_query_body
 from app.utils import filters_to_sqlalchemy
@@ -10,7 +9,7 @@ from . import service, schemas
 from ..database import get_session
 
 router = APIRouter()
-@router.get("/warehouses/", response_model=PaginatedResource[schemas.ReadWarehouse])
+@router.get("/warehouses/", response_model=PaginatedResource[schemas.DetailedWarehouse])
 def read_warehouses(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=Warehouse, filters=tqb.filters) 
@@ -27,11 +26,11 @@ def read_warehouse(warehouse_id: UUID, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Warehouse not found")
     return session_warehouse
 
-@router.post("/warehouses/", response_model=schemas.ReadWarehouse)
+@router.post("/warehouses/", response_model=schemas.DetailedWarehouse)
 def create_warehouse(warehouse: schemas.CreateWarehouse, session: Session = Depends(get_session)):
     return service.create_warehouse(session=session, warehouse=warehouse)
 
-@router.put("/warehouses/{warehouse_id}", response_model=schemas.ReadWarehouse)
+@router.put("/warehouses/{warehouse_id}", response_model=schemas.DetailedWarehouse)
 def update_warehouse(warehouse_id: UUID, warehouse: schemas.UpdateWarehouse, session: Session = Depends(get_session)):
     return service.update_warehouse(session=session, warehouse_id=warehouse_id, warehouse=warehouse)
 
@@ -70,7 +69,7 @@ def delete_warehouse_type(warehouse_type_id: UUID, session: Session = Depends(ge
     return service.delete_warehouse_type(session=session, warehouse_type_id=warehouse_type_id)
 
 # WHLocation routes
-@router.get("/whlocations/", response_model=PaginatedResource[schemas.ReadWHLocation])
+@router.get("/whlocations/", response_model=PaginatedResource[schemas.DetailedWHLocation])
 def read_whlocations(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=WHLocation, filters=tqb.filters) 
@@ -80,18 +79,18 @@ def read_whlocations(tqb: TableQueryBody = Depends(get_table_query_body),
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
-@router.get("/whlocations/{whlocation_id}", response_model=schemas.ReadWHLocation)
+@router.get("/whlocations/{whlocation_id}", response_model=schemas.DetailedWHLocation)
 def read_whlocation(whlocation_id: UUID, session: Session = Depends(get_session)):
     session_whlocation = service.get_whlocation(session, whlocation_id=whlocation_id)
     if session_whlocation is None:
         raise HTTPException(status_code=404, detail="WHLocation not found")
     return session_whlocation
 
-@router.post("/whlocations/", response_model=schemas.ReadWHLocation)
+@router.post("/whlocations/", response_model=schemas.DetailedWHLocation)
 def create_whlocation(whlocation: schemas.CreateWHLocation, session: Session = Depends(get_session)):
     return service.create_whlocation(session=session, whlocation=whlocation)
 
-@router.put("/whlocations/{whlocation_id}", response_model=schemas.ReadWHLocation)
+@router.put("/whlocations/{whlocation_id}", response_model=schemas.DetailedWHLocation)
 def update_whlocation(whlocation_id: UUID, whlocation: schemas.UpdateWHLocation, session: Session = Depends(get_session)):
     return service.update_whlocation(session=session, whlocation_id=whlocation_id, whlocation=whlocation)
 
@@ -131,7 +130,7 @@ def delete_whlocation_type(whlocation_type_id: UUID, session: Session = Depends(
     return service.delete_whlocation_type(session=session, whlocation_type_id=whlocation_type_id)
 
 # Product routes
-@router.get("/products/", response_model=PaginatedResource[schemas.ReadProduct])
+@router.get("/products/", response_model=PaginatedResource[schemas.DetailedProduct])
 def read_products(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=Product, filters=tqb.filters) 
@@ -141,18 +140,18 @@ def read_products(tqb: TableQueryBody = Depends(get_table_query_body),
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
-@router.get("/products/{product_id}", response_model=schemas.ReadProduct)
+@router.get("/products/{product_id}", response_model=schemas.DetailedProduct)
 def read_product(product_id: UUID, session: Session = Depends(get_session)):
     session_product = service.get_product(session, product_id=product_id)
     if session_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     return session_product
 
-@router.post("/products/", response_model=schemas.ReadProduct)
+@router.post("/products/", response_model=schemas.DetailedProduct)
 def create_product(product: schemas.CreateProduct, session: Session = Depends(get_session)):
     return service.create_product(session=session, product=product)
 
-@router.put("/products/{product_id}", response_model=schemas.ReadProduct)
+@router.put("/products/{product_id}", response_model=schemas.DetailedProduct)
 def update_product(product_id: UUID, product: schemas.UpdateProduct, session: Session = Depends(get_session)):
     return service.update_product(session=session, product_id=product_id, product=product)
 
@@ -161,7 +160,7 @@ def delete_product(product_id: UUID, session: Session = Depends(get_session)):
     return service.delete_product(session=session, product_id=product_id)
 
 # ProductCategory routes
-@router.get("/product_categories/", response_model=PaginatedResource[schemas.ReadProductCategory])
+@router.get("/product_categories/", response_model=PaginatedResource[schemas.DetailedProductCategory])
 def read_product_categories(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=ProductCategory, filters=tqb.filters) 
@@ -171,27 +170,27 @@ def read_product_categories(tqb: TableQueryBody = Depends(get_table_query_body),
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
-@router.get("/product_categories/{product_category_id}", response_model=schemas.ReadProductCategory)
+@router.get("/product_categories/{product_category_id}", response_model=schemas.DetailedProductCategory)
 def read_product_category(product_category_id: UUID, session: Session = Depends(get_session)):
     session_product_category = service.get_product_category(session, product_category_id=product_category_id)
     if session_product_category is None:
         raise HTTPException(status_code=404, detail="Product Category not found")
     return session_product_category
 
-@router.post("/product_categories/", response_model=schemas.ReadProductCategory)
+@router.post("/product_categories/", response_model=schemas.DetailedProductCategory)
 def create_product_category(product_category: schemas.CreateProductCategory, session: Session = Depends(get_session)):
     return service.create_product_category(session=session, product_category=product_category)
 
-@router.put("/product_categories/{product_category_id}", response_model=schemas.ReadProductCategory)
+@router.put("/product_categories/{product_category_id}", response_model=schemas.DetailedProductCategory)
 def update_product_category(product_category_id: UUID, product_category: schemas.UpdateProductCategory, session: Session = Depends(get_session)):
     return service.update_product_category(session=session, product_category_id=product_category_id, product_category=product_category)
 
-@router.delete("/product_categories/{product_category_id}", response_model=schemas.ReadProductCategory)
+@router.delete("/product_categories/{product_category_id}", response_model=schemas.DetailedProductCategory)
 def delete_product_category(product_category_id: UUID, session: Session = Depends(get_session)):
     return service.delete_product_category(session=session, product_category_id=product_category_id)
 
 # MeasureUnit routes
-@router.get("/measure_units/", response_model=PaginatedResource[schemas.ReadMeasureUnit])
+@router.get("/measure_units/", response_model=PaginatedResource[schemas.DetailedMeasureUnit])
 def read_measure_units(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=MeasureUnit, filters=tqb.filters) 
@@ -201,21 +200,21 @@ def read_measure_units(tqb: TableQueryBody = Depends(get_table_query_body),
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
-@router.get("/measure_units/{measure_unit_id}", response_model=schemas.ReadMeasureUnit)
+@router.get("/measure_units/{measure_unit_id}", response_model=schemas.DetailedMeasureUnit)
 def read_measure_unit(measure_unit_id: UUID, session: Session = Depends(get_session)):
     session_measure_unit = service.get_measure_unit(session, measure_unit_id=measure_unit_id)
     if session_measure_unit is None:
         raise HTTPException(status_code=404, detail="MeasureUnit not found")
     return session_measure_unit
 
-@router.post("/measure_units/", response_model=schemas.ReadMeasureUnit)
+@router.post("/measure_units/", response_model=schemas.DetailedMeasureUnit)
 def create_measure_unit(measure_unit: schemas.CreateMeasureUnit, session: Session = Depends(get_session)):
     return service.create_measure_unit(session=session, measure_unit=measure_unit)
 
-@router.put("/measure_units/{measure_unit_id}", response_model=schemas.ReadMeasureUnit)
+@router.put("/measure_units/{measure_unit_id}", response_model=schemas.DetailedMeasureUnit)
 def update_measure_unit(measure_unit_id: UUID, measure_unit: schemas.UpdateMeasureUnit, session: Session = Depends(get_session)):
     return service.update_measure_unit(session=session, measure_unit_id=measure_unit_id, measure_unit=measure_unit)
 
-@router.delete("/measure_units/{measure_unit_id}", response_model=schemas.ReadMeasureUnit)
+@router.delete("/measure_units/{measure_unit_id}", response_model=schemas.DetailedMeasureUnit)
 def delete_measure_unit(measure_unit_id: UUID, session: Session = Depends(get_session)):
     return service.delete_measure_unit(session=session, measure_unit_id=measure_unit_id)
