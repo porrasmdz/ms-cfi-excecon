@@ -1,12 +1,36 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
+from typing import Dict
 from app.schemas import PaginatedResource, TableQueryBody
 from app.dependencies import get_table_query_body
 from app.utils import filters_to_sqlalchemy
 from .models import Warehouse, WarehouseType, WHLocation, WHLocation_Type, Product, ProductCategory, MeasureUnit
+from .models import CyclicCount
 from . import service, schemas
 from ..database import get_session
+def get_class_from_str(key:str):
+    match key:
+        case "cyclic_counts":
+            return CyclicCount
+        case _:
+            return CyclicCount
+        
+def get_relationship_filters(model, filters: Dict):
+    composed_filters = {key: filters[key] for key in filters.keys() if "." in key}
+    related_filters = []
+    for attribute, filter in composed_filters.items():
+        related_class = get_class_from_str(attribute)
+        attribute_class = attribute.split(".")[0]
+        original_attr = getattr(model, attribute_class)
+        related_filters.append(original_attr.any(related_class.id.in_([filter.value])))
+  
+    return related_filters
+    # if isComposed:
+    #     related_class = field.property.instrument_class
+        
+    #     print("######################GOT", field, match_mode, value, related_class)
+    #     return (field.has(field.id==value))
 
 router = APIRouter()
 @router.get("/warehouses/", response_model=PaginatedResource[schemas.DetailedWarehouse])
@@ -134,6 +158,8 @@ def delete_whlocation_type(whlocation_type_id: UUID, session: Session = Depends(
 def read_products(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=Product, filters=tqb.filters) 
+    relationship_filter = get_relationship_filters(model=Product, filters=tqb.filters)
+    filters = filters + relationship_filter
     (total_registries, registries)= service.get_products(model=Product, filters=filters, 
                                                        tqb=tqb, session=session)
     response = PaginatedResource(totalResults=total_registries, results=registries, 
@@ -145,7 +171,11 @@ def read_product(product_id: UUID, session: Session = Depends(get_session)):
     session_product = service.get_product(session, product_id=product_id)
     if session_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return session_product
+    final_product = schemas.DetailedProduct.model_validate(session_product)
+    final_product.warehouse_ids = [wh.id for wh in final_product.warehouses]
+    final_product.cyclic_count_ids = [wh.id for wh in final_product.cyclic_counts]
+    final_product.whlocation_ids = [wh.id for wh in final_product.warehouse_locations]
+    return final_product
 
 @router.post("/products/", response_model=schemas.DetailedProduct)
 def create_product(product: schemas.CreateProduct, session: Session = Depends(get_session)):

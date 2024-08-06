@@ -1,9 +1,9 @@
 from app.schemas import Filter, MatchMode
 from typing import Dict, Any
-from sqlalchemy import text
+# from app.inventory.models import Product
+# Product.cyclic_counts.property.instrument_class
 def build_filter_clause(field, match_mode: MatchMode, value: Any ):
     #Might need to include model
-    
     if match_mode == MatchMode.EQUALS:
         return (field == value)
     if match_mode == MatchMode.CONTAINS:    
@@ -13,11 +13,14 @@ def build_filter_clause(field, match_mode: MatchMode, value: Any ):
     return None #Unknown filter usage
     
 
-def filters_to_sqlalchemy(model ,filters: Dict[Any, Filter]):
+def filters_to_sqlalchemy(model ,filters: Dict[str, Filter]):
     sqlalch_filters = []
+    original_attr = ""
     for attribute, filter in filters.items():
-
-        original_attr = getattr(model, attribute) #will raise exception if not found
+        if "." in attribute:
+            continue
+        else:
+            original_attr = getattr(model, attribute) #will raise exception if not found
 
         if filter.value in (None, "", []) \
         and filter.match_mode not in (MatchMode.IS_EMPTY, MatchMode.IS_NOT_EMPTY, 

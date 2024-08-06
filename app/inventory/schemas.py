@@ -175,8 +175,12 @@ class DetailedProduct(ReadSchema):
     measure_unit_id: UUID
     category_id: UUID
 
+    warehouse_ids: List["UUID"] = []
+    whlocation_ids: List["UUID"] = []
+    cyclic_count_ids: List["UUID"] = [] 
+    
     warehouses: List[ReadWarehouse]
-    warehouse_locations: Optional[List[ReadWHLocation]] = []
+    warehouse_locations: Optional[List[ReadWHLocation]] = []    
     cyclic_counts: List["ReadCyclicCount"] 
 
 class CreateProduct(CreateSchema):

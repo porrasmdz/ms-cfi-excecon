@@ -2,8 +2,10 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from uuid import UUID
 from typing import List, Any, Dict
+from app.inventory.schemas import UpdateProduct
 from app.service import get_paginated_resource
 from app.schemas import TableQueryBody, BaseSQLModel
+from app.cyclic_count.models import CyclicCount
 from .models import (
     Warehouse, WarehouseType, WHLocation, WHLocation_Type,
     Product, ProductCategory, MeasureUnit
@@ -12,18 +14,22 @@ from .models import (
 from datetime import datetime
 
 
-def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: str):
+def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: str, lookup_class):
     resulting_models = []
-    
+    print("#############CLAVE",lookup_key)
     if lookup_key in model_dict.keys():
         if len(model_dict[lookup_key]) > 0:
             for wh_id in model_dict[lookup_key]:
-                warehouse = db.query(Warehouse).filter(
-                    Warehouse.id == wh_id).first()
-                if warehouse is not None:
-                    resulting_models.append(warehouse)
+                resource = db.query(lookup_class).filter(
+                    lookup_class.id == wh_id).first()
+                if resource is not None:
+                    resulting_models.append(resource)
         model_dict.pop(lookup_key)
+        
+        print("#############res",resulting_models)
         return resulting_models
+    
+    print("#############res",[])
     return []
 
 
@@ -253,11 +259,11 @@ def get_product(session: Session, product_id: UUID):
 def create_product(session: Session, product: Product):
     session_product = {**product.model_dump()}
     session_product["warehouses"] = create_related_fields(
-        session, session_product, "warehouse_ids")
+        session, session_product, "warehouse_ids", Warehouse)
     session_product["cyclic_counts"] = create_related_fields(
-        session, session_product, "cyclic_count_ids")
+        session, session_product, "cyclic_count_ids", CyclicCount)
     session_product["warehouse_locations"] = create_related_fields(
-        session, session_product, "whlocation_ids")
+        session, session_product, "whlocation_ids", WHLocation)
     product = Product(**session_product)
     session.add(product)
     session.commit()
@@ -268,8 +274,19 @@ def create_product(session: Session, product: Product):
 def update_product(session: Session, product_id: UUID, product: Product):
     session_product = session.query(Product).filter(
         Product.id == product_id).first()
+    edition_product = UpdateProduct.model_validate(product).model_dump()
+    if 'warehouse_ids' in edition_product.keys():
+        edition_product["warehouses"] = create_related_fields(
+        session, edition_product, "warehouse_ids", Warehouse)
+    if 'cyclic_count_ids' in edition_product.keys():
+        edition_product["cyclic_counts"] = create_related_fields(
+        session, edition_product, "cyclic_count_ids", CyclicCount)
+    if 'whlocation_ids' in edition_product.keys():
+        edition_product["warehouse_locations"] = create_related_fields(
+        session, edition_product, "whlocation_ids", WHLocation)
+    
     if session_product:
-        for key, value in product.model_dump().items():
+        for key, value in edition_product.items():
             update_validating_deletion_time(session_product, key, value)
         session.commit()
         session.refresh(session_product)
