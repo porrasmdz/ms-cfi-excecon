@@ -23,8 +23,9 @@ class DetailedCyclicCount(ReadSchema):
     count_type: str = "Primer Conteo"
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
-    warehouses: Optional[List["ReadWarehouse"]] 
-    parent: Optional[ReadCyclicCount]
+    warehouse_ids: Optional[List["UUID"]] = []
+    warehouses: Optional[List["ReadWarehouse"]] =[] 
+    parent: Optional[ReadCyclicCount] = None
     parent_id: Optional[UUID] = None
     
 class CreateCyclicCount(CreateSchema):

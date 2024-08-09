@@ -13,7 +13,7 @@ router = APIRouter()
 
 ### CYCLIC_COUNT ROUTES ##########
 
-@router.get("/cyclic_counts/", response_model=PaginatedResource[schemas.ReadCyclicCount])
+@router.get("/cyclic_counts/", response_model=PaginatedResource[schemas.DetailedCyclicCount])
 def read_cyclic_counts(tqb: TableQueryBody = Depends(get_table_query_body), 
                    session: Session = Depends(get_session) ):
     filters = filters_to_sqlalchemy(model=CyclicCount, filters=tqb.filters) 
@@ -23,13 +23,22 @@ def read_cyclic_counts(tqb: TableQueryBody = Depends(get_table_query_body),
                                  skip= tqb.skip, limit=tqb.limit)
     return response
 
-@router.post("/cyclic_counts/", response_model=schemas.ReadCyclicCount)
+@router.post("/cyclic_counts/", response_model=schemas.DetailedCyclicCount)
 def create_cyclic_count(cyclic_count: schemas.CreateCyclicCount, db: Session = Depends(get_session)):
     return service.create_cyclic_count(db, cyclic_count=cyclic_count)
 
-@router.get("/cyclic_counts/{cyclic_count_id}", response_model=schemas.ReadCyclicCount)
+
+
+@router.get("/cyclic_counts/{cyclic_count_id}", response_model=schemas.DetailedCyclicCount)
 def read_cyclic_count(cyclic_count_id: UUID, db: Session = Depends(get_session)):
-    return service.get_cyclic_count(db, cyclic_count_id=cyclic_count_id)
+    session_ccount =  service.get_cyclic_count(db, cyclic_count_id=cyclic_count_id)
+    if session_ccount is None:
+        raise HTTPException(status_code=404, detail="Cyclic Count not found")
+    final_ccount = schemas.DetailedCyclicCount.model_validate(session_ccount)
+    final_ccount.warehouse_ids = [wh for wh in final_ccount.warehouses]
+    return final_ccount
+    
+
 
 @router.put("/cyclic_counts/{cyclic_count_id}", response_model=schemas.ReadCyclicCount)
 def update_cyclic_count(cyclic_count_id: UUID, cyclic_count: schemas.UpdateCyclicCount, db: Session = Depends(get_session)):

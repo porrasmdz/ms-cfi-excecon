@@ -275,13 +275,13 @@ def update_product(session: Session, product_id: UUID, product: Product):
     session_product = session.query(Product).filter(
         Product.id == product_id).first()
     edition_product = UpdateProduct.model_validate(product).model_dump()
-    if 'warehouse_ids' in edition_product.keys():
+    if 'warehouse_ids' in edition_product.keys() and edition_product["warehouse_ids"] is not None:
         edition_product["warehouses"] = create_related_fields(
         session, edition_product, "warehouse_ids", Warehouse)
-    if 'cyclic_count_ids' in edition_product.keys():
+    if 'cyclic_count_ids' in edition_product.keys() and edition_product["cyclic_count_ids"] is not None:
         edition_product["cyclic_counts"] = create_related_fields(
         session, edition_product, "cyclic_count_ids", CyclicCount)
-    if 'whlocation_ids' in edition_product.keys():
+    if 'whlocation_ids' in edition_product.keys() and edition_product["whlocation_ids"] is not None:
         edition_product["warehouse_locations"] = create_related_fields(
         session, edition_product, "whlocation_ids", WHLocation)
     
