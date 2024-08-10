@@ -3,9 +3,10 @@ from fastapi import HTTPException, status
 from uuid import UUID
 from typing import List, Any, Dict
 from app.inventory.schemas import UpdateProduct
-from app.service import get_paginated_resource
+from app.service import get_paginated_resource, paginate_aggregated_resource
 from app.schemas import TableQueryBody, BaseSQLModel
-from app.cyclic_count.models import CyclicCount
+from app.cyclic_count.models import CountRegistry, CyclicCount
+from app.models import ccount_product_table
 from .models import (
     Warehouse, WarehouseType, WHLocation, WHLocation_Type,
     Product, ProductCategory, MeasureUnit
@@ -16,7 +17,7 @@ from datetime import datetime
 
 def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: str, lookup_class):
     resulting_models = []
-    print("#############CLAVE",lookup_key)
+    print("#############CLAVE", lookup_key)
     if lookup_key in model_dict.keys():
         if len(model_dict[lookup_key]) > 0:
             for wh_id in model_dict[lookup_key]:
@@ -25,11 +26,11 @@ def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: s
                 if resource is not None:
                     resulting_models.append(resource)
         model_dict.pop(lookup_key)
-        
-        print("#############res",resulting_models)
+
+        print("#############res", resulting_models)
         return resulting_models
-    
-    print("#############res",[])
+
+    print("#############res", [])
     return []
 
 
@@ -256,6 +257,18 @@ def get_product(session: Session, product_id: UUID):
     return session.query(Product).filter(Product.id == product_id).first()
 
 
+def get_nested_products(session: Session, cyclic_count_id: UUID,  filters: List[Any], tqb: TableQueryBody):
+    alt_products_query = session.query(Product) \
+    .join(ccount_product_table) \
+    .filter(ccount_product_table.columns.cyclic_count_id == cyclic_count_id) \
+#    .join(Product.count_registries) #.where(CountRegistry.cyclic_count_id == cyclic_count_id) 
+    # print("####res", str(products_query.all()))
+    (totalResults, pipeline_result) = paginate_aggregated_resource(
+        query=alt_products_query, filters=filters, tqb=tqb)
+    return (totalResults, pipeline_result)
+    # return session.query(Product).filter(Product.id == product_id, Product.cyclic_counts).first()
+
+
 def create_product(session: Session, product: Product):
     session_product = {**product.model_dump()}
     session_product["warehouses"] = create_related_fields(
@@ -277,14 +290,14 @@ def update_product(session: Session, product_id: UUID, product: Product):
     edition_product = UpdateProduct.model_validate(product).model_dump()
     if 'warehouse_ids' in edition_product.keys() and edition_product["warehouse_ids"] is not None:
         edition_product["warehouses"] = create_related_fields(
-        session, edition_product, "warehouse_ids", Warehouse)
+            session, edition_product, "warehouse_ids", Warehouse)
     if 'cyclic_count_ids' in edition_product.keys() and edition_product["cyclic_count_ids"] is not None:
         edition_product["cyclic_counts"] = create_related_fields(
-        session, edition_product, "cyclic_count_ids", CyclicCount)
+            session, edition_product, "cyclic_count_ids", CyclicCount)
     if 'whlocation_ids' in edition_product.keys() and edition_product["whlocation_ids"] is not None:
         edition_product["warehouse_locations"] = create_related_fields(
-        session, edition_product, "whlocation_ids", WHLocation)
-    
+            session, edition_product, "whlocation_ids", WHLocation)
+
     if session_product:
         for key, value in edition_product.items():
             update_validating_deletion_time(session_product, key, value)

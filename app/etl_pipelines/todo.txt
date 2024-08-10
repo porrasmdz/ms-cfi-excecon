@@ -1,0 +1,23 @@
+My ETL classes and pipelines
+need to:
+
+
+===BASIC===
+0. Apply functions to tables
+0.1. Make Joins
+0.2. Apply filters, sort, order asc/desc  [DONE]
+0.3. Apply functions to a set or subset of data
+0.4. Group By tables and (optionally apply functions to grouped data)
+0.5. Fusion datasets (UNION, UNION ALL)
+===DATA ANLYSIS===
+1. Summarize data by using group bys, functions to set or subset and counting (Roll-Up analysis, Going up levels)
+2. Summarize Data with stat functions like mean, count, median, min, max, mode or other stats tools
+3. Need The ability to drill down or see "the reverse" of aggregated reports (Drill-Down analysis, Going down levels)
+4. Before aggregating or querying I should be capable of selecting a base dataset from set or subset
+5. Data Slicing (selecting specific columns, rows or datasets)
+6. Group By attributes
+7. Pivoting tables or data
+
+===Probably can occur on client======
+*1. Attribute aggregation techniques?
+*1.1. Weighted aggregation

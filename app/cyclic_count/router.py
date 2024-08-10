@@ -35,7 +35,7 @@ def read_cyclic_count(cyclic_count_id: UUID, db: Session = Depends(get_session))
     if session_ccount is None:
         raise HTTPException(status_code=404, detail="Cyclic Count not found")
     final_ccount = schemas.DetailedCyclicCount.model_validate(session_ccount)
-    final_ccount.warehouse_ids = [wh for wh in final_ccount.warehouses]
+    final_ccount.warehouse_ids = [wh.id for wh in final_ccount.warehouses]
     return final_ccount
     
 

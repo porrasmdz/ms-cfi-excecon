@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.inventory.router import router as inventory_router
 from app.companies.router import router as companies_router
 from app.cyclic_count.router import router as cyclic_count_router
+from app.etl_pipelines.router import router as etl_pipelines_router
 from starlette.concurrency import iterate_in_threadpool
 from .database import init_db
 import json
@@ -41,5 +42,6 @@ init_db()
 app.include_router(inventory_router)
 app.include_router(companies_router)
 app.include_router(cyclic_count_router)
+app.include_router(etl_pipelines_router)
 
 

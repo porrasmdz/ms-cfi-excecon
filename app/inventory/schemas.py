@@ -183,6 +183,27 @@ class DetailedProduct(ReadSchema):
     warehouse_locations: Optional[List[ReadWHLocation]] = []    
     cyclic_counts: List["ReadCyclicCount"] 
 
+class CountNestedProduct(ReadSchema):
+    name: str
+    code: Optional[str] = None
+    sku: Optional[str] = None
+    unit_cost: int
+    measure_unit: ReadMeasureUnit
+    category: ReadProductCategory
+    measure_unit_id: UUID
+    category_id: UUID
+
+    warehouse_ids: List["UUID"] = []
+    whlocation_ids: List["UUID"] = []
+    cyclic_count_ids: List["UUID"] = [] 
+    
+    count_registries: Optional[List["ReadCountRegistry"]] = None
+    
+    warehouses: List[ReadWarehouse]
+    warehouse_locations: Optional[List[ReadWHLocation]] = []    
+    cyclic_counts: List["ReadCyclicCount"] 
+
+
 class CreateProduct(CreateSchema):
     name: str
     code: Optional[str] = None
@@ -208,4 +229,4 @@ class UpdateProduct(UpdateSchema):
     cyclic_count_ids: Optional[List["UUID"]] = None
 
 
-from app.cyclic_count.schemas import ReadCyclicCount
+from app.cyclic_count.schemas import ReadCyclicCount, ReadCountRegistry
