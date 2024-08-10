@@ -1,7 +1,9 @@
+from sqlalchemy import ColumnElement
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from uuid import UUID
 from typing import List, Any, Dict
+from app.etl_pipelines.service import ETLPipeline
 from app.inventory.schemas import UpdateProduct
 from app.service import get_paginated_resource, paginate_aggregated_resource
 from app.schemas import TableQueryBody, BaseSQLModel
@@ -256,6 +258,25 @@ def get_products(model: BaseSQLModel, filters: List[Any], tqb: TableQueryBody, s
 def get_product(session: Session, product_id: UUID):
     return session.query(Product).filter(Product.id == product_id).first()
 
+
+def get_cyclic_count_nested_products(session: Session, 
+                                     filters: list, 
+                                     skip: int, limit: int, 
+                                     sort_by: ColumnElement, 
+                                     sort_order: int,
+                                     cyclic_count_id: str):
+    ppipeline = ETLPipeline(model=Product, session=session)
+    ppipeline.add_query_filters(filters)
+    ppipeline.add_query_filters([Product.cyclic_counts.any(CyclicCount.id == cyclic_count_id)])
+    if sort_order == 1:
+        ppipeline.set_order_attribute(sort_by.asc())
+    else:
+        ppipeline.set_order_attribute(sort_by.desc())
+    total_results = ppipeline.get_pipeline_results_count()
+    ppipeline.paginate_results(skip=skip, limit=limit)
+    
+    results = ppipeline.execute_pipeline()
+    return (total_results, results)
 
 def get_nested_products(session: Session, cyclic_count_id: UUID,  filters: List[Any], tqb: TableQueryBody):
     alt_products_query = session.query(Product) \

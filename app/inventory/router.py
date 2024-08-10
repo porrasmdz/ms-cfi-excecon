@@ -196,6 +196,8 @@ def read_products(tqb: TableQueryBody = Depends(get_table_query_body),
     relationship_filter = get_relationship_filters(
         model=Product, filters=tqb.filters)
     filters = filters + relationship_filter
+    
+
     (total_registries, registries) = service.get_products(model=Product, filters=filters,
                                                           tqb=tqb, session=session)
     response = PaginatedResource(totalResults=total_registries, results=registries,
@@ -223,9 +225,21 @@ def read_nested_product( cyclic_count_id: UUID, tqb: TableQueryBody = Depends(ge
     filters = filters_to_sqlalchemy(model=Product, filters=tqb.filters)
     relationship_filter = get_relationship_filters(
         model=Product, filters=tqb.filters)
-    filters = filters + relationship_filter
-    (total_registries, registries) = service.get_nested_products(cyclic_count_id=cyclic_count_id, filters=filters,
-                                                                 tqb=tqb, session=session)
+    filters = filters + relationship_filter 
+    sort_by= getattr(Product, tqb.sort_by)
+    
+    (total_registries, registries) = service \
+    .get_cyclic_count_nested_products(
+        session=session,
+        filters=filters,
+        skip=tqb.skip, 
+        limit=tqb.limit, 
+        sort_by=sort_by, 
+        sort_order=tqb.sort_order,
+        cyclic_count_id=str(cyclic_count_id))
+   
+    # (total_registries, registries) = service.get_nested_products(cyclic_count_id=cyclic_count_id, filters=filters,
+                                                                #  tqb=tqb, session=session)
     for registry in registries:
         counts = [ ]
         for cregistry in registry.count_registries:

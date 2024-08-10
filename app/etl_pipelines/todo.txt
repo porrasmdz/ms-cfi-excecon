@@ -4,10 +4,11 @@ need to:
 
 ===BASIC===
 0. Apply functions to tables
-0.1. Make Joins
-0.2. Apply filters, sort, order asc/desc  [DONE]
+[DONE] 0.1. Make Joins 
+[DONE] 0.2. Apply filters, sort, order asc/desc 
 0.3. Apply functions to a set or subset of data
-0.4. Group By tables and (optionally apply functions to grouped data)
+[DONE] 0.4. Group By tables and (optionally apply functions
+    to grouped data) (FUNCTIONS NEED TO BE APPLIED OR GROUPED) 
 0.5. Fusion datasets (UNION, UNION ALL)
 ===DATA ANLYSIS===
 1. Summarize data by using group bys, functions to set or subset and counting (Roll-Up analysis, Going up levels)
