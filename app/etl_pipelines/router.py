@@ -9,7 +9,7 @@ from ..database import get_session
 from fastapi import APIRouter
 
 
-router = APIRouter()
+router = APIRouter(tags=["ETL Module"])
 
 
 # @router.get("/aggregation/", response_model=PaginatedResource[])

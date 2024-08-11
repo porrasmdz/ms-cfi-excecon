@@ -278,18 +278,6 @@ def get_cyclic_count_nested_products(session: Session,
     results = ppipeline.execute_pipeline()
     return (total_results, results)
 
-def get_nested_products(session: Session, cyclic_count_id: UUID,  filters: List[Any], tqb: TableQueryBody):
-    alt_products_query = session.query(Product) \
-    .join(ccount_product_table) \
-    .filter(ccount_product_table.columns.cyclic_count_id == cyclic_count_id) \
-#    .join(Product.count_registries) #.where(CountRegistry.cyclic_count_id == cyclic_count_id) 
-    # print("####res", str(products_query.all()))
-    (totalResults, pipeline_result) = paginate_aggregated_resource(
-        query=alt_products_query, filters=filters, tqb=tqb)
-    return (totalResults, pipeline_result)
-    # return session.query(Product).filter(Product.id == product_id, Product.cyclic_counts).first()
-
-
 def create_product(session: Session, product: Product):
     session_product = {**product.model_dump()}
     session_product["warehouses"] = create_related_fields(

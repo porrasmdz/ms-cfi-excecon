@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi.testclient import TestClient
 from app.main import app
@@ -13,6 +14,7 @@ from app.companies.models import Company, CorporativeGroup, Contact
 from datetime import datetime
 
 SQLALCHEMY_DATABASE_URL = settings.TEST_DB_URL
+ASYNC_SQLALCHEMY_DATABASE_URL = settings.ASYNC_DB_URL
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 

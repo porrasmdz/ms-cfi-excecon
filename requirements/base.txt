@@ -1,10 +1,16 @@
 sqlalchemy
+# sqlalchemy[asyncio]
+
 pydantic
 pydantic-settings
 pytest
 pytest-asyncio
 httpx
 pytest-postgresql
+
 psycopg2-binary
 fastapi
 alembic
+
+fastapi-users[sqlalchemy]
+asyncpg

@@ -1,4 +1,8 @@
 *Implementar Pandas DFs + Dask para paralelizar eventualmente 
+====IMPORTANT ====
+* DEFER WORKLOAD OF CLOSING A CYCLIC COUNT TO A WORKER AND USE LAZY DYNAMIC
+* APPLY ON DELETE CASCADE TO THE ALEMBIC FILE (ALSO THE DOWNGRADE) AND UPGRADE
+* ADD TO ALEMBIC UPGRADE THE USERS, ACCESS TOKEN AND OTHER FASTAPI USERS MODEL
 
 Inventory Module:
 1. Crear los Modelos models.py [DONE]
@@ -25,11 +29,16 @@ Company Listing Module:
 3.2 Implementar Alembic [Done]
 4. Crear el frontend con react admin [DONE]
 
+ETL_PIPELINES:
+1. Crear un componente base ETL (Mas detalles en modulo)
+2. Crear File Exporter
+3. Crear File Reader
+
 Auth Module:
 1. Crear los Modelos models.py 
 2. Crear los CRUD operations en services.py 
 3. Crear las rutas 
-3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql 
+3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
 3.2 Implementar Alembic
 4. Crear el frontend con react admin
 

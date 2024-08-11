@@ -1,15 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from uuid import UUID
-from typing import Dict
+from typing import Annotated, Dict
 from app.schemas import PaginatedResource, TableQueryBody
 from app.dependencies import get_table_query_body
 from app.utils import filters_to_sqlalchemy
+from app.auth.models import User 
+from app.auth.router import current_user
 from .models import Warehouse, WarehouseType, WHLocation, WHLocation_Type, Product, ProductCategory, MeasureUnit
 from .models import CyclicCount
 from . import service, schemas
 from ..database import get_session
 
+auth_schema = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def get_class_from_str(key: str):
     match key:
@@ -38,11 +42,12 @@ def get_relationship_filters(model, filters: Dict):
     #     return (field.has(field.id==value))
 
 
-router = APIRouter()
+router = APIRouter(tags=["Inventory Module"])
 
 
 @router.get("/warehouses/", response_model=PaginatedResource[schemas.DetailedWarehouse])
-def read_warehouses(tqb: TableQueryBody = Depends(get_table_query_body),
+def read_warehouses(user: User = Depends(current_user),
+                    tqb: TableQueryBody = Depends(get_table_query_body),
                     session: Session = Depends(get_session)):
     filters = filters_to_sqlalchemy(model=Warehouse, filters=tqb.filters)
     (total_registries, registries) = service.get_warehouses(model=Warehouse, filters=filters,
@@ -238,7 +243,7 @@ def read_nested_product( cyclic_count_id: UUID, tqb: TableQueryBody = Depends(ge
         sort_order=tqb.sort_order,
         cyclic_count_id=str(cyclic_count_id))
    
-    # (total_registries, registries) = service.get_nested_products(cyclic_count_id=cyclic_count_id, filters=filters,
+    # (total_registries, registries) = service.ucts(cyclic_count_id=cyclic_count_id, filters=filters,
                                                                 #  tqb=tqb, session=session)
     for registry in registries:
         counts = [ ]

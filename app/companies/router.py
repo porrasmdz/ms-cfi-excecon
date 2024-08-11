@@ -8,7 +8,7 @@ from app.schemas import TableQueryBody, PaginatedResource
 from . import service, schemas
 from ..database import get_session
 
-router = APIRouter()
+router = APIRouter(tags=["Companies Module"])
 
 # Company routes
 @router.get("/companies/", response_model=PaginatedResource[schemas.DetailedCompany])

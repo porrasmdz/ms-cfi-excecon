@@ -2,10 +2,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Table, Column, ForeignKey
 from typing import Optional
 from datetime import datetime
-from .database import Base, engine
+from .database import Base
 from uuid import UUID, uuid4
 
-engine = engine
 
 ccount_product_table = Table(
     "ccount_product_table",
