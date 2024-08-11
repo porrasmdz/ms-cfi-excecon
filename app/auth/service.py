@@ -5,13 +5,14 @@ from fastapi_users.authentication import BearerTransport
 from fastapi_users import UUIDIDMixin, BaseUserManager
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport
 from app.config import settings
-from .dependencies import get_database_strategy, get_user_db
+from .dependencies import get_database_strategy, get_user_db, get_session
 from .models import User
 from fastapi import Request, Depends
 
 bearer_transport = BearerTransport(tokenUrl="auth/login")
 
 SECRET = settings.DB_SECRET
+
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
@@ -28,8 +29,9 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
-    ###OVERRIDE OTHER METHODS https://fastapi-users.github.io/fastapi-users/latest/configuration/user-manager/
+        print(
+            f"Verification requested for user {user.id}. Verification token: {token}")
+    # OVERRIDE OTHER METHODS https://fastapi-users.github.io/fastapi-users/latest/configuration/user-manager/
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):

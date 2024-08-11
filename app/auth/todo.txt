@@ -1,27 +1,11 @@
 EL SISTEMA DE PERMISOS SIMILAR A LOS SCOPES DEBE:
 https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/#global-view
-1. Declaro los permisos que necesita una vista en el router con fastapi
-2. Itero en la info de user obtenida por el token (con otra dependency) para saber si el user tiene TODOS los permisos declarados 
+[DONE] 1. Declaro los permisos que necesita una vista en el router con fastapi
+[DONE] 2. Itero en la info de user obtenida por el token (con otra dependency) para saber si el user tiene TODOS los permisos declarados 
     Se busca si es superuser 
     Sino permisos deben buscarse en grupo 
     Sino se buscan en role 
     Sino se buscan en permisos individuales
-###
-async def get_current_active_user(
-    current_user: Annotated[User, Security(get_current_user, scopes=["me"])],
-):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-###
-### (Otra Dependency)
-for scope in security_scopes.scopes:
-        if scope not in token_data.scopes:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not enough permissions",
-                headers={"WWW-Authenticate": authenticate_value},
-            )
-###
 CONCLUSION
-El Depends(current_user) puede estar dentro de otra dependencia que devuelva los permisos
+[DONE] El Depends(current_user) puede estar dentro de otra dependencia que devuelva los permisos
+4. IMPLEMENT TESTING FOR AUTH MODULE

@@ -3,42 +3,43 @@
 * DEFER WORKLOAD OF CLOSING A CYCLIC COUNT TO A WORKER AND USE LAZY DYNAMIC
 * APPLY ON DELETE CASCADE TO THE ALEMBIC FILE (ALSO THE DOWNGRADE) AND UPGRADE
 * ADD TO ALEMBIC UPGRADE THE USERS, ACCESS TOKEN AND OTHER FASTAPI USERS MODEL
+* ADD TO ALEMBIC COMMIT PERMISSIONS TO permissions create update delete read
 
 Inventory Module:
-1. Crear los Modelos models.py [DONE]
-2. Crear los CRUD operations en services.py [DONE]
-3. Crear las rutas [Done]
-3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
-3.2 Implementar Alembic [DONE]
-4. Crear el frontend con react admin [DONE]
+[DONE] 1. Crear los Modelos models.py [DONE]
+[DONE] 2. Crear los CRUD operations en services.py [DONE]
+[DONE] 3. Crear las rutas [Done]
+[DONE] 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
+[DONE] 3.2 Implementar Alembic [DONE]
+[DONE] 4. Crear el frontend con react admin [DONE]
 
 Cyclic Count Module:
-1. Crear los Modelos models.py [DONE]
-2. Crear los CRUD operations en services.py [DONE]
-3. Crear las rutas [DONE]
-3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
-3.2 Implementar Alembic [Done]
-4. Crear el frontend con react admin [DONE]
-5. Use ETL pandas to query and organize data in nested_products
+[DONE] 1. Crear los Modelos models.py [DONE]
+[DONE] 2. Crear los CRUD operations en services.py [DONE]
+[DONE] 3. Crear las rutas [DONE]
+[DONE] 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
+[DONE] 3.2 Implementar Alembic [Done]
+[DONE] 4. Crear el frontend con react admin [DONE]
+[DONE] 5. Use ETL pandas to query and organize data in nested_products
 
 Company Listing Module:
-1. Crear los Modelos models.py [DONE]
-2. Crear los CRUD operations en services.py [DONE]
-3. Crear las rutas [DONE]
-3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
-3.2 Implementar Alembic [Done]
-4. Crear el frontend con react admin [DONE]
+[DONE] 1. Crear los Modelos models.py [DONE]
+[DONE] 2. Crear los CRUD operations en services.py [DONE]
+[DONE] 3. Crear las rutas [DONE]
+[DONE] 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
+[DONE] 3.2 Implementar Alembic [Done]
+[DONE] 4. Crear el frontend con react admin [DONE]
 
 ETL_PIPELINES:
-1. Crear un componente base ETL (Mas detalles en modulo)
+[DONE] 1. Crear un componente base ETL (Mas detalles en modulo)
 2. Crear File Exporter
 3. Crear File Reader
 
 Auth Module:
-1. Crear los Modelos models.py 
-2. Crear los CRUD operations en services.py 
-3. Crear las rutas 
-3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
+[DONE] 1. Crear los Modelos models.py 
+[DONE] 2. Crear los CRUD operations en services.py 
+[DONE] 3. Crear las rutas 
+[DONE] 3.1 Crear dependencies para hacer las aggregations, filters, sortbys y paginations de sql [DONE]
 3.2 Implementar Alembic
 4. Crear el frontend con react admin
 
@@ -46,7 +47,7 @@ PRE-RELEASE:
 0. VALIDATE IF I DONT NEED TO USE INIT_DB WHEN USING ALEMBIC MIGRATIONS
 0.1 ADD "IF RELATED FIELD NOT FOUND THROW HTTP EXCEPTION 404"
 1. Complete Business Logic
-    1.1. Create a Cyclic Count [DONE]
+[DONE]    1.1. Create a Cyclic Count [DONE]
     1.2. Generate Report and Cyclic Count Results
     1.3. Upload File 
         1.3.1 and Export File to create Cyclic Count [DONE]
@@ -60,8 +61,9 @@ Testing
 1. Unit testing for Inventory models [DONE]
 2. Unit testing for Cyclic Count models [DONE]
 3. Unit testing for companies models [DONE]
+4. Unit Testing for auth models
 
 DOCS
 1. Populate OpenAPI Docs (api tags, model examples, return codes, error codes)
 2. Map exceptions to HTTP_exceptions 
-3. Add needed headers to responses
+[DONE] 3. Add needed headers to responses

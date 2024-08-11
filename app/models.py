@@ -2,7 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Table, Column, ForeignKey
 from typing import Optional
 from datetime import datetime
-from .database import Base
+from .database import Base, AsyncBase
 from uuid import UUID, uuid4
 
 
@@ -20,6 +20,15 @@ warehouse_ccount_table = Table(
 )
 
 class BaseSQLModel(Base):
+    __abstract__ = True
+    id : Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    is_archived : Mapped[bool] = mapped_column(default=False)
+    created_at : Mapped[datetime] = mapped_column()
+    updated_at : Mapped[datetime] = mapped_column()
+    deleted_at : Mapped[Optional[datetime]] = mapped_column()
+
+
+class AsyncBaseSQLModel(AsyncBase):
     __abstract__ = True
     id : Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     is_archived : Mapped[bool] = mapped_column(default=False)

@@ -1,7 +1,5 @@
 from app.schemas import Filter, MatchMode
 from typing import Dict, Any
-# from app.inventory.models import Product
-# Product.cyclic_counts.property.instrument_class
 def build_filter_clause(field, match_mode: MatchMode, value: Any ):
     #Might need to include model
     if match_mode == MatchMode.EQUALS:
@@ -49,3 +47,9 @@ def filters_to_sqlalchemy(model ,filters: Dict[str, Filter]):
         if result_filter is not None:
             sqlalch_filters.append(result_filter)
     return sqlalch_filters
+
+def update_validating_deletion_time(object, key, value):
+    if value is not None and key != "deleted_at":
+        setattr(object, key, value)
+    if key == "deleted_at":
+        setattr(object, key, value)

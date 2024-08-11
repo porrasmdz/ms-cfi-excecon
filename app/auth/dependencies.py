@@ -21,7 +21,9 @@ async def get_access_token_db(
 def get_database_strategy(
     access_token_db: AccessTokenDatabase[AccessToken] = Depends(get_access_token_db),
 ) -> DatabaseStrategy:
-    return DatabaseStrategy(access_token_db, lifetime_seconds=3600)
+    db_strat= DatabaseStrategy(access_token_db, lifetime_seconds=3600)
+    
+    return db_strat
 
 # def get_jwt_strategy() -> JWTStrategy:
 #     return JWTStrategy(secret=SECRET, lifetime_seconds=3600)

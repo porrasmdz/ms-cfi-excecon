@@ -1,12 +1,14 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from app.auth.middleware import check_user_permissions
 from app.inventory.router import router as inventory_router
 from app.companies.router import router as companies_router
 from app.cyclic_count.router import router as cyclic_count_router
 from app.auth.router import router as auth_router
 from app.etl_pipelines.router import router as etl_pipelines_router
 from starlette.concurrency import iterate_in_threadpool
-from .database import init_db
+from .database import async_init_db, init_db
+# from app.auth.middleware import check_user_permissions
 import json
 app = FastAPI()
 origins = [
@@ -21,8 +23,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# Might add middleware to append total_results and skip, limit in ContentRange on headers
-# Middleware appending processing time to response example
+
+
 @app.middleware("http")
 async def append_content_range_header(request: Request, call_next):
     response = await call_next(request)
@@ -40,9 +42,11 @@ async def append_content_range_header(request: Request, call_next):
     return response
 
 init_db()
-app.include_router(inventory_router, tags=["Inventory Module"])
+async_init_db()
+
+app.include_router(auth_router)
+app.include_router(inventory_router, tags=["Inventory Module"], dependencies=[Depends(check_user_permissions)])
 app.include_router(companies_router)
 app.include_router(cyclic_count_router)
 app.include_router(etl_pipelines_router)
-app.include_router(auth_router)
 

@@ -19,7 +19,6 @@ from datetime import datetime
 
 def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: str, lookup_class):
     resulting_models = []
-    print("#############CLAVE", lookup_key)
     if lookup_key in model_dict.keys():
         if len(model_dict[lookup_key]) > 0:
             for wh_id in model_dict[lookup_key]:
@@ -29,10 +28,8 @@ def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: s
                     resulting_models.append(resource)
         model_dict.pop(lookup_key)
 
-        print("#############res", resulting_models)
         return resulting_models
 
-    print("#############res", [])
     return []
 
 
