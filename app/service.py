@@ -126,7 +126,7 @@ class DatabaseRepository:
                                 detail=f"{ie.orig}")
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                                detail=f"Error desconocido {ie}")
+                                detail=f"Error desconocido {e}")
     def update_resource(self, session: Session, resource_id: UUID, resource: UpdateSchema):
         session_resource =self.get_one_resource(resource_id=resource_id, session=session)
         edition_resource = resource.model_dump()

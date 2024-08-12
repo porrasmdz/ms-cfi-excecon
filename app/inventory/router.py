@@ -61,15 +61,14 @@ munit_router = ResourceRouter(model=MeasureUnit, name="measure_units",
                               create_schema=schemas.CreateMeasureUnit,
                               update_schema=schemas.UpdateMeasureUnit
                               )
-
+related_models = {"cyclic_counts": CyclicCount}
 related_ids_dict = {"warehouse_ids": "warehouses",
                     "cyclic_count_idss": "cyclic_counts",
                     "whlocation_ids": "warehouse_locations"}
 product_router = ResourceRouter(model=Product, name="products",
                                 model_repo=service.products_crud, read_schema=schemas.ReadProduct,
                                 detailed_schema=schemas.DetailedProduct, create_schema=schemas.CreateProduct,
-                                update_schema=schemas.UpdateProduct, related_dict={
-                                    "cyclic_counts": CyclicCount},
+                                update_schema=schemas.UpdateProduct, related_dict=related_models,
                                 related_ids_dict=related_ids_dict)
 
 

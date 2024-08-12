@@ -105,7 +105,7 @@ class ReadActivityRegistry(ReadSchema):
     commentary: str
     user: UUID
     count_registry_id: UUID
-class DetailedReadActivityRegistry(ReadSchema):
+class DetailedActivityRegistry(ReadSchema):
     id: UUID
     detail: str
     commentary: str

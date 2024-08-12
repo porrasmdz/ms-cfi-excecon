@@ -5,8 +5,9 @@ from fastapi_users.authentication import BearerTransport
 from fastapi_users import UUIDIDMixin, BaseUserManager
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport
 from app.config import settings
-from .dependencies import get_database_strategy, get_user_db, get_session
-from .models import User
+from app.service import DatabaseRepository
+from .dependencies import get_database_strategy, get_user_db
+from .models import Permission, Role, User
 from fastapi import Request, Depends
 
 bearer_transport = BearerTransport(tokenUrl="auth/login")
@@ -43,3 +44,6 @@ auth_backend = AuthenticationBackend(
     transport=bearer_transport,
     get_strategy=get_database_strategy,
 )
+
+role_crud = DatabaseRepository(model=Role)
+permission_crud = DatabaseRepository(model=Permission)
