@@ -45,7 +45,7 @@ init_db()
 async_init_db()
 
 app.include_router(auth_router)
-app.include_router(inventory_router, tags=["Inventory Module"], dependencies=[Depends(check_user_permissions)])
+app.include_router(inventory_router, tags=["Inventory Module"])
 app.include_router(companies_router)
 app.include_router(cyclic_count_router)
 app.include_router(etl_pipelines_router)

@@ -10,15 +10,7 @@ from app.service import get_paginated_resource
 from app.utils import get_next_ccount
 from .models import (CyclicCount, CountRegistry, ActivityRegistry)
 
-def update_validating_deletion_time(object, key, value):
-    if value is not None and key != "deleted_at":
-        setattr(object, key, value)
-    if key == "deleted_at":
-        setattr(object, key, value)
-
-
 ### CYCLIC_COUNT SERVICES ##########
-
 def get_cyclic_counts(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
     return get_paginated_resource(model, filters, tqb, session)
 

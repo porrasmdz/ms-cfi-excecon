@@ -5,14 +5,10 @@ from app.models import BaseSQLModel
 from app.schemas import TableQueryBody
 from app.service import get_paginated_resource
 from uuid import UUID
+
+from app.utils import update_validating_deletion_time
 from .models import (
     Company, CorporativeGroup, Contact )
-
-def update_validating_deletion_time(object, key, value):
-    if value is not None and key != "deleted_at":
-        setattr(object, key, value)
-    if key == "deleted_at":
-        setattr(object, key, value)
 
 def get_companies(model:BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
     return get_paginated_resource(model, filters, tqb, session)

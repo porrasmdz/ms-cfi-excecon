@@ -5,10 +5,11 @@ from uuid import UUID
 from typing import List, Any, Dict
 from app.etl_pipelines.service import ETLPipeline
 from app.inventory.schemas import UpdateProduct
-from app.service import get_paginated_resource, paginate_aggregated_resource
+from app.service import DatabaseRepository, create_related_fields, get_paginated_resource, paginate_aggregated_resource
 from app.schemas import TableQueryBody, BaseSQLModel
 from app.cyclic_count.models import CountRegistry, CyclicCount
 from app.models import ccount_product_table
+from app.utils import update_validating_deletion_time
 from .models import (
     Warehouse, WarehouseType, WHLocation, WHLocation_Type,
     Product, ProductCategory, MeasureUnit
@@ -17,91 +18,10 @@ from .models import (
 from datetime import datetime
 
 
-def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: str, lookup_class):
-    resulting_models = []
-    if lookup_key in model_dict.keys():
-        if len(model_dict[lookup_key]) > 0:
-            for wh_id in model_dict[lookup_key]:
-                resource = db.query(lookup_class).filter(
-                    lookup_class.id == wh_id).first()
-                if resource is not None:
-                    resulting_models.append(resource)
-        model_dict.pop(lookup_key)
-
-        return resulting_models
-
-    return []
-
-
-def update_validating_deletion_time(object, key, value):
-    if value is not None and key != "deleted_at":
-        setattr(object, key, value)
-    if key == "deleted_at":
-        setattr(object, key, value)
-
-
-def get_wh_locations_for_warehouse(db: Session, warehouse_id: UUID):
-    warehouse = db.query(Warehouse).filter(
-        Warehouse.id == warehouse_id).first()
-    if warehouse:
-        result = [wh_loc.id for wh_loc in warehouse.wh_locations]
-        return result
-    return []
-
 # CRUD Operations for Warehouse
-# TODO: Validate Company, Warehouse_Type exist
-
-
-def get_warehouses(model: BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
-    return get_paginated_resource(model, filters, tqb, session)
-
-
-def get_warehouse(session: Session, warehouse_id: UUID):
-    warehouse = session.query(Warehouse).filter(
-        Warehouse.id == warehouse_id).first()
-
-    return warehouse
-
-
-def create_warehouse(session: Session, warehouse: Warehouse):
-    session_warehouse = Warehouse(**warehouse.model_dump())
-    session.add(session_warehouse)
-    session.commit()
-    session.refresh(session_warehouse)
-    return session_warehouse
-
-
-def update_warehouse(session: Session, warehouse_id: UUID, warehouse: Warehouse):
-    session_warehouse = session.query(Warehouse).filter(
-        Warehouse.id == warehouse_id).first()
-    if session_warehouse:
-        for key, value in warehouse.model_dump().items():
-            update_validating_deletion_time(session_warehouse, key, value)
-        session.commit()
-        session.refresh(session_warehouse)
-    else:
-        raise HTTPException(
-            status_code=400, detail=f"Warehouse with id {warehouse_id} not found")
-    return session_warehouse
-
-
-def delete_warehouse(session: Session, warehouse_id: UUID):
-    session_warehouse = session.query(Warehouse).filter(
-        Warehouse.id == warehouse_id).first()
-    if session_warehouse:
-        if len(session_warehouse.wh_locations) > 0:
-            raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
-                                detail=f"Warehouse with id {warehouse_id} contains warehouse locations. Please delete all WH Locations first.")
-
-        session.delete(session_warehouse)
-        session.commit()
-
-    else:
-        raise HTTPException(
-            status_code=400, detail=f"Warehouse with id {warehouse_id} not found")
-
-    return session_warehouse
-
+warehouse_crud = DatabaseRepository(
+    model=Warehouse 
+)
 # CRUD Operations for WarehouseType
 
 
@@ -246,15 +166,19 @@ def delete_whlocation_type(session: Session, whlocation_type_id: UUID):
 
 # CRUD Operations for Product
 # TODO: Check MeasureUnits, ProductCategory, Warehouses, Warehouse Locations exist
-
-
-def get_products(model: BaseSQLModel, filters: List[Any], tqb: TableQueryBody, session: Session):
-    return get_paginated_resource(model, filters, tqb, session)
-
-
-def get_product(session: Session, product_id: UUID):
-    return session.query(Product).filter(Product.id == product_id).first()
-
+products_m2m_models = {
+    "warehouse_ids": Warehouse,
+    "cyclic_count_ids": CyclicCount,
+    "whlocation_ids": WHLocation
+    }
+products_m2m_keys = {
+    "warehouse_ids": "warehouses",
+    "cyclic_count_ids": "cyclic_counts",
+    "whlocation_ids": "warehouse_locations"
+    }
+products_crud = DatabaseRepository(model=Product, 
+                                   related_keys=products_m2m_keys,
+                                   related_models=products_m2m_models)
 
 def get_cyclic_count_nested_products(session: Session, 
                                      filters: list, 
@@ -275,57 +199,6 @@ def get_cyclic_count_nested_products(session: Session,
     results = ppipeline.execute_pipeline()
     return (total_results, results)
 
-def create_product(session: Session, product: Product):
-    session_product = {**product.model_dump()}
-    session_product["warehouses"] = create_related_fields(
-        session, session_product, "warehouse_ids", Warehouse)
-    session_product["cyclic_counts"] = create_related_fields(
-        session, session_product, "cyclic_count_ids", CyclicCount)
-    session_product["warehouse_locations"] = create_related_fields(
-        session, session_product, "whlocation_ids", WHLocation)
-    product = Product(**session_product)
-    session.add(product)
-    session.commit()
-    session.refresh(product)
-    return product
-
-
-def update_product(session: Session, product_id: UUID, product: Product):
-    session_product = session.query(Product).filter(
-        Product.id == product_id).first()
-    edition_product = UpdateProduct.model_validate(product).model_dump()
-    if 'warehouse_ids' in edition_product.keys() and edition_product["warehouse_ids"] is not None:
-        edition_product["warehouses"] = create_related_fields(
-            session, edition_product, "warehouse_ids", Warehouse)
-    if 'cyclic_count_ids' in edition_product.keys() and edition_product["cyclic_count_ids"] is not None:
-        edition_product["cyclic_counts"] = create_related_fields(
-            session, edition_product, "cyclic_count_ids", CyclicCount)
-    if 'whlocation_ids' in edition_product.keys() and edition_product["whlocation_ids"] is not None:
-        edition_product["warehouse_locations"] = create_related_fields(
-            session, edition_product, "whlocation_ids", WHLocation)
-
-    if session_product:
-        for key, value in edition_product.items():
-            update_validating_deletion_time(session_product, key, value)
-        session.commit()
-        session.refresh(session_product)
-    else:
-        raise HTTPException(
-            status_code=400, detail=f"Product with id {product_id} not found")
-
-    return session_product
-
-
-def delete_product(session: Session, product_id: UUID):
-    session_product = session.query(Product).filter(
-        Product.id == product_id).first()
-    if session_product:
-        session.delete(session_product)
-        session.commit()
-    else:
-        raise HTTPException(
-            status_code=400, detail=f"Product with id {product_id} not found")
-    return session_product
 
 # CRUD Operations for ProductCategory
 

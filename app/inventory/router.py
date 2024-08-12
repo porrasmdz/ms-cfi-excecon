@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from uuid import UUID
 from typing import Annotated, Dict
 from app.schemas import PaginatedResource, TableQueryBody
 from app.dependencies import get_table_query_body
+from app.service import ResourceRouter, get_relationship_filters
 from app.utils import filters_to_sqlalchemy
 from app.auth.models import User 
 from .models import Warehouse, WarehouseType, WHLocation, WHLocation_Type, Product, ProductCategory, MeasureUnit
@@ -11,27 +13,6 @@ from .models import CyclicCount
 from . import service, schemas
 from ..database import get_session
 
-
-def get_class_from_str(key: str):
-    match key:
-        case "cyclic_counts":
-            return CyclicCount
-        case _:
-            return CyclicCount
-
-
-def get_relationship_filters(model, filters: Dict):
-    composed_filters = {key: filters[key]
-                        for key in filters.keys() if "." in key}
-    related_filters = []
-    for attribute, filter in composed_filters.items():
-        related_class = get_class_from_str(attribute)
-        attribute_class = attribute.split(".")[0]
-        original_attr = getattr(model, attribute_class)
-        related_filters.append(original_attr.any(
-            related_class.id.in_([filter.value])))
-
-    return related_filters
     # if isComposed:
     #     related_class = field.property.instrument_class
 
@@ -41,41 +22,11 @@ def get_relationship_filters(model, filters: Dict):
 
 router = APIRouter(tags=["Inventory Module"])
 
-
-@router.get("/warehouses/", response_model=PaginatedResource[schemas.DetailedWarehouse])
-def read_warehouses(tqb: TableQueryBody = Depends(get_table_query_body),
-                    session: Session = Depends(get_session)):
-    filters = filters_to_sqlalchemy(model=Warehouse, filters=tqb.filters)
-    (total_registries, registries) = service.get_warehouses(model=Warehouse, filters=filters,
-                                                            tqb=tqb, session=session)
-    response = PaginatedResource(totalResults=total_registries, results=registries,
-                                 skip=tqb.skip, limit=tqb.limit)
-    return response
-
-
-@router.get("/warehouses/{warehouse_id}", response_model=schemas.DetailedWarehouse)
-def read_warehouse(warehouse_id: UUID, session: Session = Depends(get_session)):
-    session_warehouse = service.get_warehouse(
-        session, warehouse_id=warehouse_id)
-    if session_warehouse is None:
-        raise HTTPException(status_code=404, detail="Warehouse not found")
-    return session_warehouse
-
-
-@router.post("/warehouses/", response_model=schemas.DetailedWarehouse)
-def create_warehouse(warehouse: schemas.CreateWarehouse, session: Session = Depends(get_session)):
-    return service.create_warehouse(session=session, warehouse=warehouse)
-
-
-@router.put("/warehouses/{warehouse_id}", response_model=schemas.DetailedWarehouse)
-def update_warehouse(warehouse_id: UUID, warehouse: schemas.UpdateWarehouse, session: Session = Depends(get_session)):
-    return service.update_warehouse(session=session, warehouse_id=warehouse_id, warehouse=warehouse)
-
-
-@router.delete("/warehouses/{warehouse_id}", response_model=schemas.ReadWarehouse)
-def delete_warehouse(warehouse_id: UUID, session: Session = Depends(get_session)):
-    return service.delete_warehouse(session=session, warehouse_id=warehouse_id)
-
+warehouse_router = ResourceRouter(model=Warehouse, name="warehouses", 
+                                  model_repo=service.warehouse_crud, read_schema=schemas.ReadWarehouse,
+                                  detailed_schema=schemas.DetailedWarehouse, create_schema=schemas.CreateWarehouse,
+                                  update_schema=schemas.UpdateWarehouse)
+router.include_router(warehouse_router.get_crud_routes())
 # WarehouseType routes
 
 
@@ -188,38 +139,16 @@ def delete_whlocation_type(whlocation_type_id: UUID, session: Session = Depends(
     return service.delete_whlocation_type(session=session, whlocation_type_id=whlocation_type_id)
 
 # Product routes
+related_ids_dict = {"warehouse_ids": "warehouses",
+                    "cyclic_count_idss": "cyclic_counts",
+                    "whlocation_ids": "warehouse_locations"}
+product_router = ResourceRouter(model=Product,name="products",
+                                model_repo=service.products_crud, read_schema=schemas.ReadProduct,
+                                detailed_schema=schemas.DetailedProduct, create_schema=schemas.CreateProduct,
+                                update_schema=schemas.UpdateProduct, related_dict={"cyclic_counts": CyclicCount},
+                                related_ids_dict=related_ids_dict)
 
-
-@router.get("/products/", response_model=PaginatedResource[schemas.DetailedProduct])
-def read_products(tqb: TableQueryBody = Depends(get_table_query_body),
-                  session: Session = Depends(get_session)):
-    filters = filters_to_sqlalchemy(model=Product, filters=tqb.filters)
-    relationship_filter = get_relationship_filters(
-        model=Product, filters=tqb.filters)
-    filters = filters + relationship_filter
-    
-
-    (total_registries, registries) = service.get_products(model=Product, filters=filters,
-                                                          tqb=tqb, session=session)
-    response = PaginatedResource(totalResults=total_registries, results=registries,
-                                 skip=tqb.skip, limit=tqb.limit)
-    return response
-
-
-@router.get("/products/{product_id}", response_model=schemas.DetailedProduct)
-def read_product(product_id: UUID, session: Session = Depends(get_session)):
-    session_product = service.get_product(session, product_id=product_id)
-    if session_product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    final_product = schemas.DetailedProduct.model_validate(session_product)
-    final_product.warehouse_ids = [wh.id for wh in final_product.warehouses]
-    final_product.cyclic_count_ids = [
-        wh.id for wh in final_product.cyclic_counts]
-    final_product.whlocation_ids = [
-        wh.id for wh in final_product.warehouse_locations]
-    return final_product
-
-
+router.include_router(product_router.get_crud_routes())
 @router.get("/cyclic_count/{cyclic_count_id}/products/", response_model=PaginatedResource[schemas.CountNestedProduct])
 def read_nested_product( cyclic_count_id: UUID, tqb: TableQueryBody = Depends(get_table_query_body),
                         session: Session = Depends(get_session)):
@@ -251,21 +180,6 @@ def read_nested_product( cyclic_count_id: UUID, tqb: TableQueryBody = Depends(ge
                                  skip=tqb.skip, limit=tqb.limit)
     return response
    
-
-
-@router.post("/products/", response_model=schemas.DetailedProduct)
-def create_product(product: schemas.CreateProduct, session: Session = Depends(get_session)):
-    return service.create_product(session=session, product=product)
-
-
-@router.put("/products/{product_id}", response_model=schemas.DetailedProduct)
-def update_product(product_id: UUID, product: schemas.UpdateProduct, session: Session = Depends(get_session)):
-    return service.update_product(session=session, product_id=product_id, product=product)
-
-
-@router.delete("/products/{product_id}", response_model=schemas.ReadProduct)
-def delete_product(product_id: UUID, session: Session = Depends(get_session)):
-    return service.delete_product(session=session, product_id=product_id)
 
 # ProductCategory routes
 
