@@ -1,9 +1,25 @@
 from typing import Optional, List, Literal
-from pydantic import Field
+from fastapi import status
+from pydantic import Field, BaseModel
 from uuid import UUID
 from datetime import datetime
 from ..schemas import CreateSchema, ReadSchema, UpdateSchema
 from app.inventory.schemas import ReadWarehouse, ReadProduct
+from typing import Any
+###FileTestResponse######
+class RelatedColumnResultsDict(BaseModel):
+    status: int
+    detail: str
+    null_rows: List[Optional[Any]] = []
+    null_idx: List[Optional[Any]] = []
+    nf_rows: List[Optional[Any]] = []
+    nf_idx: List[Optional[Any]] = []
+    
+class CountFileTestResult(BaseModel):
+    status: int
+    categories: RelatedColumnResultsDict
+    m_units: RelatedColumnResultsDict
+    products: RelatedColumnResultsDict
 
 ###CYCLIC_COUNT##########
 class ReadCyclicCount(ReadSchema):

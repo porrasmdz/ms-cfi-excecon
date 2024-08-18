@@ -37,7 +37,6 @@ async def append_content_range_header(request: Request, call_next):
         limit = response_json['limit']
         response.headers['Access-Control-Expose-Headers'] = 'Content-Range'
         response.headers["Content-Range"] = f"resources {skip}-{limit}/{total_results}"
-        print("appended content-range", response.method)
     except: pass
     return response
 

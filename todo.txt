@@ -4,7 +4,10 @@
 * APPLY ON DELETE CASCADE TO THE ALEMBIC FILE (ALSO THE DOWNGRADE) AND UPGRADE
 * ADD TO ALEMBIC UPGRADE THE USERS, ACCESS TOKEN AND OTHER FASTAPI USERS MODEL
 * ADD TO ALEMBIC COMMIT PERMISSIONS TO permissions create update delete read
-*****REFACTOR USING DATAREPOSITORY AND RESOURCEROUTE IN SERVICE.PY
+* TEST ASSIGN AND UNASSING M2M, M2O MODELS EG.: [PUT] PRODUCTS W/ MU_UNIT 
+* CORRECT PRODUCT ASSIGNING ITS RESULT FROM MUNITS, IN UPLOAD FILE, IT SHOULD CHECK SYS_UNITS IS NOT NULL AND WARN ABOUT IT
+* CHECK FOR WAREHOUSE AND WHLOCATIONS IN REPORT CREATION TAKE IT FROM FILE NOT FROM CCOUNT
+[DONE] *****REFACTOR USING DATAREPOSITORY AND RESOURCEROUTE IN SERVICE.PY
 
 Inventory Module:
 [DONE] 1. Crear los Modelos models.py [DONE]
@@ -33,8 +36,9 @@ Company Listing Module:
 
 ETL_PIPELINES:
 [DONE] 1. Crear un componente base ETL (Mas detalles en modulo)
-2. Crear File Exporter
-3. Crear File Reader
+[DONE] 1.2. Crear un historial de filtros aplicados a un reporte para el drilldown
+[DONE] 2. Crear File Exporter (To xl)
+[DONE] 3. Crear File Reader (from xl and checking data and/or cleaning it)
 
 Auth Module:
 [DONE] 1. Crear los Modelos models.py 
@@ -45,26 +49,28 @@ Auth Module:
 4. Crear el frontend con react admin
 
 PRE-RELEASE:
-0. VALIDATE IF I DONT NEED TO USE INIT_DB WHEN USING ALEMBIC MIGRATIONS
-0.1 ADD "IF RELATED FIELD NOT FOUND THROW HTTP EXCEPTION 404"
+[DONE, I DONT, MIGRATE MANUALLY] 0. VALIDATE IF I DONT NEED TO USE INIT_DB WHEN USING ALEMBIC MIGRATIONS
+[DONE THROUGH CLASS] 0.1 ADD "IF RELATED FIELD NOT FOUND THROW HTTP EXCEPTION 404"
 1. Complete Business Logic
 [DONE]    1.1. Create a Cyclic Count [DONE]
     1.2. Generate Report and Cyclic Count Results
-    1.3. Upload File 
-        1.3.1 and Export File to create Cyclic Count [DONE]
+[DONE]    1.3. Upload File 
+[DONE]        1.3.1 and Export File to create Cyclic Count [DONE]
     1.4. Consolidated Cyclic Count 
     1.5. Check history of my Cyclic Count and Registry Logs
 2. Implement Cyclic Count Kanban
 3. Deployment files
 4. Multitenancy
 5. Use enums instead of string where applies status, registry type, etc...
+
 Testing
-1. Unit testing for Inventory models [DONE]
-2. Unit testing for Cyclic Count models [DONE]
-3. Unit testing for companies models [DONE]
+[DONE] 1. Unit testing for Inventory models 
+[DONE] 2. Unit testing for Cyclic Count models 
+[DONE] 3. Unit testing for companies models 
 4. Unit Testing for auth models
+5. Unit Testing for ETL models
 
 DOCS
 1. Populate OpenAPI Docs (api tags, model examples, return codes, error codes)
-2. Map exceptions to HTTP_exceptions 
+[DONE] 2. Map exceptions to HTTP_exceptions 
 [DONE] 3. Add needed headers to responses

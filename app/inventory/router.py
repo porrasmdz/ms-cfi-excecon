@@ -72,12 +72,17 @@ product_router = ResourceRouter(model=Product, name="products",
                                 related_ids_dict=related_ids_dict)
 
 
-@router.get("/cyclic_count/{cyclic_count_id}/products/", response_model=PaginatedResource[schemas.CountNestedProduct])
+ccount_related_for_nested = {
+    "cyclic_counts": CyclicCount,
+}
+@router.get("/cyclic_count/{cyclic_count_id}/products", response_model=PaginatedResource[schemas.CountNestedProduct])
 def read_nested_product(cyclic_count_id: UUID, tqb: TableQueryBody = Depends(get_table_query_body),
                         session: Session = Depends(get_session)):
+    
     filters = filters_to_sqlalchemy(model=Product, filters=tqb.filters)
     relationship_filter = get_relationship_filters(
-        model=Product, filters=tqb.filters)
+        model=Product, filters=tqb.filters, related_dict=ccount_related_for_nested)
+    
     filters = filters + relationship_filter
     sort_by = getattr(Product, tqb.sort_by)
 

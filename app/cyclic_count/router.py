@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from io import BytesIO
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from uuid import UUID
 from app.inventory.models import Warehouse
-from app.schemas import PaginatedResource, TableQueryBody
-from app.dependencies import get_table_query_body
 from app.service import ResourceRouter
-from app.utils import filters_to_sqlalchemy
 from . import schemas, service
 from .models import CyclicCount, CountRegistry, ActivityRegistry
 from ..database import get_session
-
+import aiofiles
+import pandas as pd
 router = APIRouter(tags=["Cyclic Count Module"])
 
 cyclic_count_related = {
@@ -46,6 +45,62 @@ aregistry_router = ResourceRouter(model=ActivityRegistry, name="activity_registr
 @router.get("/cyclic_counts/{cyclic_count_id}/close", response_model=schemas.DetailedCyclicCount)
 def close_cyclic_count(cyclic_count_id: UUID, db: Session = Depends(get_session)):
     return service.close_cyclic_count(db, cyclic_count_id=cyclic_count_id)
+
+
+@router.get("/cyclic_counts/{cyclic_count_id}/file", response_model=schemas.DetailedCyclicCount)
+def get_cyclic_count_file(cyclic_count_id: UUID, db: Session = Depends(get_session)):
+    return service.export_cyclic_count(db, cyclic_count_id=cyclic_count_id)
+
+
+@router.post("/cyclic_counts/{cyclic_count_id}/upload")
+async def upload(cyclic_count_id: UUID,file: UploadFile = File(...), db: Session = Depends(get_session)):
+    try:
+        async with aiofiles.open(file.filename, 'wb') as f:
+            while contents := await file.read(1024 * 1024):
+                await f.write(contents)
+            
+                data = BytesIO(contents)
+                df = pd.read_excel(data, engine="openpyxl")
+                
+                test_result = service.create_products_from_file(db=db, cyclic_count_id=cyclic_count_id
+                                                                ,dataframe=df)
+                print("COMPLETED FILE UPLOAD :D")
+                return {"message": "Succesful Upload" if test_result.status == 200 else "Found some errors on file",
+                        **test_result.model_dump()
+                        }
+                
+    except Exception as e:
+        print(str(e))
+        return {"message": f"There was an error uploading the file {e}"}
+    finally:
+        await file.close()
+
+
+@router.post("/cyclic_counts/{cyclic_count_id}/upload/test")
+async def test_file(cyclic_count_id: UUID,file: UploadFile = File(...), db: Session = Depends(get_session)):
+    try:
+        async with aiofiles.open(file.filename, 'wb') as f:
+            while contents := await file.read(1024 * 1024):
+                await f.write(contents)
+            
+                data = BytesIO(contents)
+                df = pd.read_excel(data, engine="openpyxl")
+                
+                test_result = service.test_models_creation(db=db, dataframe=df)
+                print("COMPLETED FILE UPLOAD :D")
+                return {"message": "Succesful Upload" if test_result.status == 200 else "Found some errors on file",
+                        **test_result.model_dump()
+                        }
+                
+    except Exception as e:
+        print(str(e))
+        return {"message": f"There was an error uploading the file {e}"}
+    finally:
+        await file.close()
+
+    
+
+
 
 
 router.include_router(ccount_router.get_crud_routes())

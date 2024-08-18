@@ -32,7 +32,6 @@ def get_paginated_resource(model:BaseSQLModel, filters: List[Any], tqb: TableQue
     
     return (totalResults, results)
 
-
 def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: str, lookup_class):
     resulting_models = []
     if lookup_key in model_dict.keys():
@@ -45,7 +44,6 @@ def create_related_fields(db: Session, model_dict: Dict[str, Any], lookup_key: s
         model_dict.pop(lookup_key)
         return resulting_models
     return []
-
 
 def paginate_aggregated_resource(query:Query, filters: List[Any], tqb: TableQueryBody):
     skip = tqb.skip
@@ -68,20 +66,25 @@ def paginate_aggregated_resource(query:Query, filters: List[Any], tqb: TableQuer
     
     return (totalResults, results)
 
-
-
 def get_relationship_filters(model, filters: Dict, related_dict: Dict[str, BaseSQLModel]):
     composed_filters = {key: filters[key]
                         for key in filters.keys() if "." in key}
     related_filters = []
     for attribute, filter in composed_filters.items():
-        related_class = related_dict[attribute]
+        related_class = related_dict[attribute.split('.')[0]]
         attribute_class = attribute.split(".")[0]
         original_attr = getattr(model, attribute_class)
         related_filters.append(original_attr.any(
             related_class.id.in_([filter.value])))
-
+        
     return related_filters
+
+def locate_resource_from_name(db:Session, model: BaseSQLModel, res_crud: "DatabaseRepository", name:str):
+    pcat = res_crud.get_all_resources(session=db,filters=[model.name == name], tqb= TableQueryBody())
+    if len(pcat[1]) > 0: 
+        return pcat[1][0]
+    else:
+        return None
 
 class DatabaseRepository:
     def __init__(self, model: BaseSQLModel,

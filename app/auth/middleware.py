@@ -20,9 +20,6 @@ async def check_user_permissions(request: Request,
     request_method = str(request.method).upper()
     action = translate_method_to_action(request_method)
     resource = request.url.path[1:]
-    print("Resource: ", resource)
-    print("Current User: ", user)
-    print("Is Superuser: ", user.is_superuser)
     if not resource in EXCLUDED_PATHS:
         if not has_permission(user, resource, action, session):
             raise HTTPException(

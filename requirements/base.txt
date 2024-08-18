@@ -14,3 +14,8 @@ alembic
 
 fastapi-users[sqlalchemy]
 asyncpg
+
+pandas
+openpyxl
+python-multipart
+aiofiles

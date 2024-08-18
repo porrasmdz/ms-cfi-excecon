@@ -21,7 +21,6 @@ router = APIRouter(tags=["Auth Module"])
 
 class PermissionRouter(ResourceRouter):
     def create(self):
-        print("THIS METHOD IS CREATE BEING CALLED :D")
         @self.router.post("/permissions/", response_model=schemas.PermissionRead)
         def create_permission(permission: schemas.PermissionCreate, session: Session = Depends(get_session)):    
             rbac = utils.RBACUtilities(session=session)

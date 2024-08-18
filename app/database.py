@@ -11,6 +11,10 @@ engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
 
+analysis_engine = create_engine(
+    SQLALCHEMY_DATABASE_URL
+)
+
 async_engine = create_async_engine(
     ASYNC_SQLALCHEMY_DATABASE_URL
 )

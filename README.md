@@ -1,3 +1,13 @@
+#Industry Standard Excel libs:
+-  Openpyxl + Pandas (Reading, manipulating, writing to excel and cleaning/analyzing data)
+
+
+#Commercial Table Parser
+https://www.eyelevel.ai/product/pricing-plans
+
+Excel 2010 Library
+https://openpyxl.readthedocs.io/en/stable/
+
 FAST-API-FULLSTACK REFERENCE APP (Docker, Frontend, HTPPS,LINTER, RUFF)
 https://github.com/tiangolo/full-stack-fastapi-template
 
