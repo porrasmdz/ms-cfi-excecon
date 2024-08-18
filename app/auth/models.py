@@ -54,7 +54,7 @@ class Role(BaseSQLModel):
     )
     
     permissions: Mapped[Optional[List["Permission"]]] = relationship(
-        secondary=role_permission_table, back_populates="roles"
+        secondary=role_permission_table, back_populates="roles", lazy="selectin"
     )
 
 class Permission(BaseSQLModel):
@@ -62,7 +62,7 @@ class Permission(BaseSQLModel):
     resource:  Mapped[str] = mapped_column()
     method:  Mapped[str] = mapped_column()
     # m2m users DONE
-    # m2m roles DONE
+    # m2m roles DON
     users: Mapped[Optional[List["User"]]] = relationship(
         secondary=user_permission_table, back_populates="permissions"
     )

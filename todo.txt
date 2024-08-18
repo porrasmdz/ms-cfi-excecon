@@ -1,4 +1,4 @@
-*Implementar Pandas DFs + Dask para paralelizar eventualmente 
+[DONE] *Implementar Pandas DFs + Dask para paralelizar eventualmente 
 ====IMPORTANT ====
 * DEFER WORKLOAD OF CLOSING A CYCLIC COUNT TO A WORKER AND USE LAZY DYNAMIC
 * APPLY ON DELETE CASCADE TO THE ALEMBIC FILE (ALSO THE DOWNGRADE) AND UPGRADE
@@ -7,6 +7,7 @@
 * TEST ASSIGN AND UNASSING M2M, M2O MODELS EG.: [PUT] PRODUCTS W/ MU_UNIT 
 * CORRECT PRODUCT ASSIGNING ITS RESULT FROM MUNITS, IN UPLOAD FILE, IT SHOULD CHECK SYS_UNITS IS NOT NULL AND WARN ABOUT IT
 * CHECK FOR WAREHOUSE AND WHLOCATIONS IN REPORT CREATION TAKE IT FROM FILE NOT FROM CCOUNT
+* SERVE HTTPONLY COOKIE FROM SERVER SIDE
 [DONE] *****REFACTOR USING DATAREPOSITORY AND RESOURCEROUTE IN SERVICE.PY
 
 Inventory Module:
@@ -53,11 +54,11 @@ PRE-RELEASE:
 [DONE THROUGH CLASS] 0.1 ADD "IF RELATED FIELD NOT FOUND THROW HTTP EXCEPTION 404"
 1. Complete Business Logic
 [DONE]    1.1. Create a Cyclic Count [DONE]
-    1.2. Generate Report and Cyclic Count Results
+    1.2. Generate Report and Cyclic Count Results [MATERIALIZED VIEWS IN ALEMBIC PROB]
 [DONE]    1.3. Upload File 
 [DONE]        1.3.1 and Export File to create Cyclic Count [DONE]
-    1.4. Consolidated Cyclic Count 
-    1.5. Check history of my Cyclic Count and Registry Logs
+    1.4. Consolidated Cyclic Count [A WRAPPER THAT JOINS ALL COUNTS IN A SINGLE ONE THROUGH MATERIALIZED VIEW]
+    1.5. Check history of my Cyclic Count and Registry Logs 
 2. Implement Cyclic Count Kanban
 3. Deployment files
 4. Multitenancy
