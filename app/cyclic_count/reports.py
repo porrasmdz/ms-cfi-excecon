@@ -19,6 +19,7 @@ def WarehouseInfo(BaseModel):
 def CountResponsibles(BaseModel):
     users: List[User] = []
 
+#THIS HAS TO BE ON FIRST CYCLIC_COUNT ONLY, CODE SHOULD BACKTRACK TO GET IT
 def WarehouseControlData(BaseModel):
     original_registries: int
     original_units: str
@@ -137,7 +138,7 @@ def CountSummary(BaseModel):
 #Total USD Faltantes
 
 #########################################
-###RESUMEN - SingleCyclicCount
+###RESUMEN - CyclicCountHistory
 #########################################
 def CyclicCountHistory(BaseModel):
     column_headers: List[str]
