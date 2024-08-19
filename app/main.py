@@ -4,7 +4,8 @@ from app.auth.middleware import check_user_permissions
 from app.inventory.router import router as inventory_router
 from app.companies.router import router as companies_router
 from app.cyclic_count.router import router as cyclic_count_router
-from app.auth.router import router as auth_router
+from app.auth.router import router as auth_router, rbac_router 
+from app.config import settings
 from app.etl_pipelines.router import router as etl_pipelines_router
 from starlette.concurrency import iterate_in_threadpool
 from .database import async_init_db, init_db
@@ -43,9 +44,18 @@ async def append_content_range_header(request: Request, call_next):
 init_db()
 async_init_db()
 
-app.include_router(auth_router)
-app.include_router(inventory_router, tags=["Inventory Module"])
-app.include_router(companies_router)
-app.include_router(cyclic_count_router)
-app.include_router(etl_pipelines_router)
+if settings.ENVIRONMENT == "test":
+    app.include_router(auth_router)
+    app.include_router(rbac_router)
+    app.include_router(inventory_router)
+    app.include_router(companies_router)
+    app.include_router(cyclic_count_router)
+    app.include_router(etl_pipelines_router)
+else:
+    app.include_router(auth_router)
+    app.include_router(rbac_router, dependencies=[Depends(check_user_permissions)])
+    app.include_router(inventory_router, dependencies=[Depends(check_user_permissions)])
+    app.include_router(companies_router, dependencies=[Depends(check_user_permissions)])
+    app.include_router(cyclic_count_router, dependencies=[Depends(check_user_permissions)])
+    app.include_router(etl_pipelines_router, dependencies=[Depends(check_user_permissions)])
 

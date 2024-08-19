@@ -1,9 +1,11 @@
 from io import BytesIO
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 from uuid import UUID
+from app.auth.models import User
 from app.inventory.models import Warehouse
 from app.service import ResourceRouter
+from app.auth.middleware import current_user
 from . import schemas, service
 from .models import CyclicCount, CountRegistry, ActivityRegistry
 from ..database import get_session
@@ -17,7 +19,30 @@ cyclic_count_related = {
 cyclic_count_m2m_keys = {
     "warehouse_ids": "warehouses",
 }
-ccount_router = ResourceRouter(model=CyclicCount, name="cyclic_counts",
+
+class LogTracedRouter(ResourceRouter):
+    def create(self):
+        @self.router.post(f"/{self.name}/", response_model=self.detailed_schema)
+        def get_create_route(resource: self.create_schema,
+            session: Session = Depends(get_session), 
+            user: User = Depends(current_user)):
+            return self.model_repo.create_resource(session=session, resource=resource, user=user)
+    def update(self):
+        @self.router.put(f"/{self.name}/"+"{resource_id}", response_model=self.detailed_schema)
+        def get_update_route(resource: self.update_schema,
+                            resource_id: UUID,
+                            session: Session = Depends(get_session),
+                            user: User = Depends(current_user)):
+            return self.model_repo.update_resource(session=session, resource_id=resource_id, resource=resource, user=user)
+    def delete(self):
+        @self.router.delete(f"/{self.name}/"+"{resource_id}", response_model=self.read_schema)
+        def get_delete_route(resource_id: UUID,
+            session: Session = Depends(get_session), 
+            user: User = Depends(current_user)):
+            return self.model_repo.delete_resource(session=session, resource_id=resource_id, user=user)
+
+
+ccount_router = LogTracedRouter(model=CyclicCount, name="cyclic_counts",
                                model_repo=service.cyclic_count_crud,
                                read_schema=schemas.ReadCyclicCount,
                                detailed_schema=schemas.DetailedCyclicCount,
@@ -26,7 +51,7 @@ ccount_router = ResourceRouter(model=CyclicCount, name="cyclic_counts",
                                related_dict=cyclic_count_related,
                                related_ids_dict=cyclic_count_m2m_keys
                                )
-cregistry_router = ResourceRouter(model=CountRegistry, name="count_registries",
+cregistry_router = LogTracedRouter(model=CountRegistry, name="count_registries",
                                   model_repo=service.count_registry_crud,
                                   read_schema=schemas.ReadCountRegistry,
                                   detailed_schema=schemas.DetailedCountRegistry,
@@ -53,7 +78,7 @@ def get_cyclic_count_file(cyclic_count_id: UUID, db: Session = Depends(get_sessi
 
 
 @router.post("/cyclic_counts/{cyclic_count_id}/upload")
-async def upload(cyclic_count_id: UUID,file: UploadFile = File(...), db: Session = Depends(get_session)):
+async def upload(cyclic_count_id: UUID, file: UploadFile = File(...), db: Session = Depends(get_session)):
     try:
         async with aiofiles.open(file.filename, 'wb') as f:
             while contents := await file.read(1024 * 1024):

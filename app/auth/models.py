@@ -2,6 +2,7 @@ from typing import List, Optional
 from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
+
 from ..models import BaseSQLModel, Base
 from fastapi_users_db_sqlalchemy.access_token import (
     SQLAlchemyBaseAccessTokenTableUUID,

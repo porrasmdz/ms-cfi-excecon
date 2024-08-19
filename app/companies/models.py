@@ -2,6 +2,8 @@ from sqlalchemy import Boolean, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List, Optional
 from uuid import UUID
+
+from app.cyclic_count.models import CyclicCount
 from ..models import BaseSQLModel,Base
 from datetime import date
 
@@ -20,7 +22,9 @@ class Company(BaseSQLModel):
     #Many to one
     corporate_group_id : Mapped[UUID] = mapped_column(ForeignKey("corporate_group.id"))
     corporate_group : Mapped["CorporativeGroup"] = relationship(back_populates="companies") 
-
+    #One2Many
+    cyclic_counts : Mapped[Optional[List["CyclicCount"]]] = relationship(back_populates="company")
+ 
 
 class CorporativeGroup(BaseSQLModel):
     __tablename__ = "corporate_group"

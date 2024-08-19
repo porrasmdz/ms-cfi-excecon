@@ -8,7 +8,8 @@ def create_test_response(null_cat_idx:list,null_categories:list, nf_cat_idx: lis
     results = [] #First cat, then mus
     successful_result = True
     for null_idx, null_values, nf_idx, nf_values in model_idx_val_tuples:
-        if len(null_values) > 0 | len(nf_values) > 0:
+        
+        if len(null_values) > 0 or len(nf_values) > 0:
             results.append(RelatedColumnResultsDict(
                 status=status.HTTP_400_BAD_REQUEST,
                 detail="Algunas filas contienen valores inválidos",

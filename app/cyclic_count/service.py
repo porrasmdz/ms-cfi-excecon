@@ -1,19 +1,22 @@
+from fastapi import Depends
 from sqlalchemy.orm import Session, make_transient
 from pandas import DataFrame
-import numpy as np
 from uuid import UUID
-from typing import List
+from typing import List, Optional
+from app.auth.models import User
+from app.auth.middleware import current_user
+from app.cyclic_count.constants import ActivityAction
 from app.cyclic_count.utils import create_test_response
 from app.etl_pipelines.utils import get_rows_w_nf_models_from_serie, locate_null_rows_in_df, standarize_nulls_from_df
 from app.etl_pipelines.service import ETLPipeline, PandasAnalyzer
 from app.inventory.models import MeasureUnit, Warehouse,  ProductCategory
 from app.inventory.service import measure_unit_crud, product_category_crud, products_crud
 from app.inventory.schemas import CreateProduct
+from app.schemas import CreateSchema, UpdateSchema
 from app.service import DatabaseRepository, locate_resource_from_name
-from .schemas import CreateCountRegistry
+from .schemas import CreateActivityRegistry, CreateCountRegistry
 from app.utils import get_next_ccount
 from .models import (CyclicCount, CountRegistry, ActivityRegistry)
-
 
 cyclic_count_m2m_models = {
     "warehouse_ids": Warehouse,
@@ -21,11 +24,34 @@ cyclic_count_m2m_models = {
 cyclic_count_m2m_keys = {
     "warehouse_ids": "warehouses",
 }
-cyclic_count_crud = DatabaseRepository(
-    model=CyclicCount, related_keys=cyclic_count_m2m_keys, related_models=cyclic_count_m2m_models)
-count_registry_crud = DatabaseRepository(model=CountRegistry)
 activity_registry_crud = DatabaseRepository(model=ActivityRegistry)
 
+class LogTracedRepository(DatabaseRepository):
+    def create_resource(self, session: Session, resource: CreateSchema, user: Optional[User] = None):
+        sup_result = super().create_resource(session=session, resource=resource)
+        if user is not None:
+            aregistry = CreateActivityRegistry(model=self.model.__tablename__, 
+                                               action=f"{ActivityAction.CREATE} - {sup_result.id}",user_id=user.id)
+            activity_registry_crud.create_resource(session=session, resource=aregistry)
+        return sup_result
+    def update_resource(self, session: Session, resource_id: UUID, resource: UpdateSchema, user: Optional[User] = None):
+        sup_result = super().update_resource(session=session, resource_id=resource_id, resource=resource)
+        if user is not None:
+            aregistry = CreateActivityRegistry(model=self.model.__tablename__, 
+                                               action=f"{ActivityAction.EDIT} - {sup_result.id}",user_id=user.id)
+            activity_registry_crud.create_resource(session=session, resource=aregistry)
+        return sup_result
+    def delete_resource(self, session: Session, resource_id: UUID, user: Optional[User] = None):
+        sup_result = super().delete_resource(session, resource_id)
+        if user is not None:
+            aregistry = CreateActivityRegistry(model=self.model.__tablename__, 
+                                               action=f"{ActivityAction.DELETE} - {sup_result.id}",user_id=user.id)
+            activity_registry_crud.create_resource(session=session, resource=aregistry)
+        return sup_result
+    
+cyclic_count_crud = LogTracedRepository(
+    model=CyclicCount, related_keys=cyclic_count_m2m_keys, related_models=cyclic_count_m2m_models)
+count_registry_crud = LogTracedRepository(model=CountRegistry)
 
 def test_models_creation(db: Session, dataframe: DataFrame):
     category_tag = "Categoria"
@@ -44,7 +70,6 @@ def test_models_creation(db: Session, dataframe: DataFrame):
         null_cat_idx=null_cat_idxs, null_categories=null_cat_rows, nf_cat_idx=nf_cat_idxs, nf_cat_rows=nf_cat_rows,
         null_mu_idx=null_mu_idxs, null_mus=null_mu_rows, nf_mu_idx=nf_mu_idxs, nf_mu_rows=nf_mu_rows)
     return result
-
 
 def close_cyclic_count(db: Session, cyclic_count_id: UUID):
     # Copy ccount
@@ -71,8 +96,19 @@ def close_cyclic_count(db: Session, cyclic_count_id: UUID):
                                                CountRegistry.product_id == product.id])
         system_registry: List[CountRegistry] = registries_pipeline.execute_pipeline(
         )
+        registries_pipeline.add_query_filters([CountRegistry.cyclic_count_id == cyclic_count_id,
+                                               CountRegistry.registry_type == "physical",
+                                               CountRegistry.product_id == product.id])
+        physical_registry: List[CountRegistry] = registries_pipeline.execute_pipeline(
+        )
+        
         if len(system_registry) > 0:
             reg = system_registry[0]
+            if len(physical_registry) > 0:
+                preg = physical_registry[0]
+                if preg.registry_units == reg.registry_units:
+                    cyclic_count.products.remove(product)
+                    continue
             db.expunge(reg)
             make_transient(reg)
             del reg.id
@@ -81,13 +117,13 @@ def close_cyclic_count(db: Session, cyclic_count_id: UUID):
             db.add(reg)
             db.commit()
             db.refresh(reg)
+
     previous_ccount.status = "Cerrado"
     # CreateNew
     db.add(cyclic_count)
     db.commit()
     db.refresh(cyclic_count)
     return cyclic_count
-
 
 def export_cyclic_count(db: Session, cyclic_count_id: UUID):
     # Copy ccount
@@ -111,7 +147,6 @@ def export_cyclic_count(db: Session, cyclic_count_id: UUID):
     registries_pipeline = PandasAnalyzer(model=CountRegistry, session=db)
     registries_pipeline.export_excel_file(
         table_query=products_query, cyclic_count_id=cyclic_count_id)
-
     
 def create_products_from_file(db:Session, cyclic_count_id: UUID, dataframe:DataFrame):
     sys_unit_tag= "U.Sistema"

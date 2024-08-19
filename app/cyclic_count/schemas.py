@@ -3,6 +3,8 @@ from fastapi import status
 from pydantic import Field, BaseModel
 from uuid import UUID
 from datetime import datetime
+from app.auth.schemas import UserRead
+from app.companies.schemas import ReadCompany
 from ..schemas import CreateSchema, ReadSchema, UpdateSchema
 from app.inventory.schemas import ReadWarehouse, ReadProduct
 from typing import Any
@@ -29,6 +31,7 @@ class ReadCyclicCount(ReadSchema):
     count_type: str = "Primer Conteo"
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
+    company_id: Optional[UUID] = None 
     warehouses: Optional[List["ReadWarehouse"]] 
     parent_id: Optional[UUID] = None
     
@@ -39,6 +42,8 @@ class DetailedCyclicCount(ReadSchema):
     count_type: str = "Primer Conteo"
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
+    company_id: UUID 
+    company: ReadCompany
     warehouse_ids: Optional[List["UUID"]] = []
     warehouses: Optional[List["ReadWarehouse"]] =[] 
     parent: Optional[ReadCyclicCount] = None
@@ -50,6 +55,7 @@ class CreateCyclicCount(CreateSchema):
     count_type: str = "Primer Conteo"
     count_date_start: datetime = Field(default_factory=datetime.now)
     count_date_finish: datetime = Field(default_factory=datetime.now)
+    company_id: UUID 
     warehouse_ids: List["UUID"]
     parent_id: Optional[UUID] = None
     
@@ -59,7 +65,7 @@ class UpdateCyclicCount(UpdateSchema):
     count_type: Optional[str] = None 
     count_date_start: Optional[datetime] = None
     count_date_finish: Optional[datetime] = None
-
+    company_id: Optional[UUID] = None 
     warehouse_ids: Optional[List["UUID"]] = None
     parent_id: Optional[UUID] = None
     
@@ -117,26 +123,23 @@ class UpdateCountRegistry(UpdateSchema):
 ###ACTIVITY_REGISTRY##############
 class ReadActivityRegistry(ReadSchema):
     id: UUID
-    detail: str
-    commentary: str
-    user: UUID
-    count_registry_id: UUID
+    model: str
+    action: str
+    user_id: UUID
+    
 class DetailedActivityRegistry(ReadSchema):
     id: UUID
-    detail: str
-    commentary: str
-    user: UUID
-    count_registry: ReadCountRegistry
-    count_registry_id: UUID
+    model: str
+    action: str
+    user_id: UUID
+    user: UserRead
     
 class CreateActivityRegistry(CreateSchema):
-    detail: str
-    commentary: Optional[str]
-    user: UUID
-    count_registry_id: UUID
+    model: str
+    action: str
+    user_id: UUID
     
 class UpdateActivityRegistry(UpdateSchema):
-    detail: Optional[str] = None
-    commentary: Optional[str] = None
-    user: Optional[UUID] = None
-    count_registry_id: Optional[UUID] = None
+    model: Optional[str]
+    action: Optional[str]
+    user_id: Optional[UUID]

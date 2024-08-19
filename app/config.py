@@ -4,6 +4,7 @@ PRECISION_MULTIPLIER = 100000
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
+    ENVIRONMENT: str 
     DB_URL : str
     ASYNC_DB_URL : str
     TEST_DB_URL : str 

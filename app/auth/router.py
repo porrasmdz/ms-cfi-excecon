@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["Auth Module"])
 
+rbac_router = APIRouter(tags=["RBAC Module"])
 
 class PermissionRouter(ResourceRouter):
     def create(self):
@@ -54,7 +55,7 @@ permission_router = PermissionRouter(model= Permission, name="permissions",
 )
 
 
-@router.post("/roles/{role_id}/user/{user_id}", response_model=schemas.UserRead)
+@rbac_router.post("/roles/{role_id}/user/{user_id}", response_model=schemas.UserRead)
 def assign_role(role_id: uuid.UUID, user_id: uuid.UUID, session: Session = Depends(get_session)):
     rbac = utils.RBACUtilities(session)
     role = rbac.get_single_registry(Role, role_id)
@@ -63,7 +64,7 @@ def assign_role(role_id: uuid.UUID, user_id: uuid.UUID, session: Session = Depen
     return user
 
 
-@router.post("/permission/{permission}/user/{user_id}", response_model=schemas.UserRead)
+@rbac_router.post("/permission/{permission}/user/{user_id}", response_model=schemas.UserRead)
 def assign_permission(permission: uuid.UUID, user_id: uuid.UUID, session: Session = Depends(get_session)):
     rbac = utils.RBACUtilities(session)
     permission = rbac.get_single_registry(Permission, permission)
@@ -72,7 +73,7 @@ def assign_permission(permission: uuid.UUID, user_id: uuid.UUID, session: Sessio
     return user
 
 
-@router.post("/permission/{permission}/role/{role_id}", response_model=schemas.RoleRead)
+@rbac_router.post("/permission/{permission}/role/{role_id}", response_model=schemas.RoleRead)
 def assign_permission_to_role(permission: uuid.UUID, role_id: uuid.UUID, session: Session = Depends(get_session)):
     try:
         rbac = utils.RBACUtilities(session)
@@ -87,8 +88,8 @@ def assign_permission_to_role(permission: uuid.UUID, role_id: uuid.UUID, session
         raise e
 
 
-router.include_router(role_router.get_crud_routes())
-router.include_router(permission_router.get_crud_routes())
+rbac_router.include_router(role_router.get_crud_routes())
+rbac_router.include_router(permission_router.get_crud_routes())
 router.include_router(fastapi_users.get_auth_router(auth_backend),
                       prefix="/auth")
 router.include_router(

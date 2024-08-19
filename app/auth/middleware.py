@@ -24,5 +24,6 @@ async def check_user_permissions(request: Request,
         if not has_permission(user, resource, action, session):
             raise HTTPException(
                 status_code=403, detail="Forbidden")
+    return user
         
         
