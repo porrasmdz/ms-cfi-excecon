@@ -93,20 +93,28 @@ class ETLPipeline:
         self.query = select(self.model)  # flush query pipeline
         return results_rows
     
-    def execute_pipeline_rows(self) -> List[Row]:
-        
-        # print("####EXECUTING QUERY ROWS", str(self.query))
+    def execute_pipeline_rows(self) -> List[Row]:        
         results_rows = self.session.execute(self.query).all()
         self.query = select(self.model)  # flush query pipeline
         return results_rows
 
-
+#TEST THIS
 class PandasAnalyzer(ETLPipeline):
+    def __init__(self, df=None ,**kwargs):
+        self.df = df
+        super().__init__(**kwargs)
+
+    def paginate_results(self, skip: int = 0, limit: int = 10):
+        pass
+        # self.query = self.query.offset(skip).limit(limit)
+    
     def from_db_to_pd(self, query,params) -> pd.DataFrame:        
         df = pd.read_sql(query, self.session.bind, params=params)    
         return df
+    
     def export_excel_file(self, table_query:str, cyclic_count_id: str) :
         df = self.from_db_to_pd(query=table_query,params=(cyclic_count_id,))
         df.to_excel("test_output.xlsx")
+        
     def excel_to_df(self):
         pass
